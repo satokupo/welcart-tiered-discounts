@@ -20,8 +20,8 @@
 
 | 内容 | 行き先 |
 |---|---|
-| 画面上の動き・入力の流れ | `機能仕様.md` |
-| どの DB 製品を使うか | `技術構成と運用.md` |
+| 画面上の動き・入力の流れ | `FUNCTIONAL_SPEC.md` |
+| どの DB 製品を使うか | `TECH_STACK_AND_OPERATIONS.md` |
 | 変更の経緯 | `decisions/`（索引は `DECISIONS.md`） |
 
 ### 書くときの注意
