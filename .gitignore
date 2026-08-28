@@ -1,0 +1,8 @@
+# グローバルで管理していないものだけ記載する
+# （グローバル gitignore: ~/.config/git/ignore）
+
+# .claude/plans/ はグローバルで直下ファイルのみ無視しているため、
+# サブディレクトリ（yyyy/mm/）を追跡するために明示的にアンイグノア
+!.claude/plans/
+!.claude/plans/*/
+!.claude/plans/*/**
