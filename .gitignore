@@ -6,3 +6,41 @@
 !.claude/plans/
 !.claude/plans/*/
 !.claude/plans/*/**
+
+# 視覚資料（Git管理外）
+docs/visdoc/items/
+
+# ローカル認証情報（サンプルは追跡する）
+/docker/local.env
+
+# Composer / PHPUnit / PHPCS のプロジェクトローカル生成物
+/vendor/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.phpcs-cache/
+/coverage/
+
+# WordPress / Welcart / Docker のランタイム生成物
+/runtime/
+/docker/runtime/
+/docker/volumes/
+/docker/logs/
+/wordpress/
+/welcart/
+/db/
+/mysql/
+/wp-content/
+/docker/wordpress/wp-content/uploads/
+/docker/wordpress/wp-content/plugins/
+/docker/wordpress/wp-content/themes/
+/*.sql
+/.wp-cli/cache/
+/wp-content/uploads/
+/wp-content/cache/
+/uploads/
+/debug.log
+/*.log
+/**/*.log
+
+# ローカルOSのメタデータ
+.DS_Store

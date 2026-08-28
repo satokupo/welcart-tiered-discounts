@@ -1,0 +1,38 @@
+{
+    "name": "satokupo/welcart-tiered-discounts",
+    "description": "Development toolchain for an independent Welcart WordPress plugin.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+        "phpunit/phpunit": "~9.6.0",
+        "squizlabs/php_codesniffer": "~3.13.5",
+        "wp-coding-standards/wpcs": "~3.4.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.3.33"
+        },
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": "find plugin tests -type f -name '*.php' -print0 | xargs -0 -n 1 php -l",
+        "lint:php": "@lint",
+        "phpcs": "@php ./vendor/bin/phpcs --standard=phpcs.xml.dist",
+        "phpcs:config": "@php ./vendor/bin/phpcs --config-show",
+        "phpunit": "@php ./vendor/bin/phpunit --configuration phpunit.xml.dist",
+        "phpunit:config": "@php ./vendor/bin/phpunit --configuration phpunit.xml.dist --list-tests",
+        "test": "@phpunit",
+        "test:config": "@phpunit:config",
+        "quality": [
+            "@lint",
+            "@phpcs",
+            "@phpunit:config"
+        ]
+    }
+}

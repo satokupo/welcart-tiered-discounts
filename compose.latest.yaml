@@ -1,0 +1,80 @@
+name: welcart-tiered-discounts-latest
+
+services:
+  db:
+    image: mysql:26.7.0
+    environment:
+      MYSQL_DATABASE: ${LATEST_DB_NAME}
+      MYSQL_USER: ${LATEST_DB_USER}
+      MYSQL_PASSWORD: ${LATEST_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${LATEST_DB_ROOT_PASSWORD}
+    volumes:
+      - latest_db_data:/var/lib/mysql
+    networks:
+      - latest
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mysqladmin ping -h 127.0.0.1 -u root
+          -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  wordpress:
+    image: wordpress:7.1-php8.5-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${LATEST_DB_NAME}
+      WORDPRESS_DB_USER: ${LATEST_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${LATEST_DB_PASSWORD}
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - latest_wordpress_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts
+      - ./docker/wordpress/php-dev.ini:/usr/local/etc/php/conf.d/zz-welcart-dev.ini:ro
+      - ./docker/wordpress/dev-mail-sink.sh:/usr/local/bin/dev-mail-sink.sh:ro
+    networks:
+      - latest
+
+  cli:
+    image: wordpress:cli-2.12.0-php8.5
+    user: "33:33"
+    depends_on:
+      wordpress:
+        condition: service_started
+    working_dir: /var/www/html
+    environment:
+      HOME: /tmp
+      WP_CLI_CACHE_DIR: /tmp/wp-cli-cache
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${LATEST_DB_NAME}
+      WORDPRESS_DB_USER: ${LATEST_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${LATEST_DB_PASSWORD}
+    entrypoint: [""]
+    command:
+      - tail
+      - -f
+      - /dev/null
+    volumes:
+      - latest_wordpress_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts
+    networks:
+      - latest
+
+volumes:
+  latest_db_data:
+    name: welcart-tiered-discounts-latest-db
+  latest_wordpress_data:
+    name: welcart-tiered-discounts-latest-wordpress
+
+networks:
+  latest:
+    name: welcart-tiered-discounts-latest

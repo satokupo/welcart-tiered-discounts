@@ -1,0 +1,63 @@
+name: welcart-tiered-discounts-minimum
+
+services:
+  db:
+    image: mysql:5.5.62
+    platform: linux/amd64
+    environment:
+      MYSQL_DATABASE: ${MINIMUM_DB_NAME}
+      MYSQL_USER: ${MINIMUM_DB_USER}
+      MYSQL_PASSWORD: ${MINIMUM_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MINIMUM_DB_ROOT_PASSWORD}
+    volumes:
+      - minimum_db_data:/var/lib/mysql
+    networks:
+      - minimum
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mysqladmin ping -h 127.0.0.1 -u root
+          -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: docker/minimum/Dockerfile
+      args:
+        WORDPRESS_VERSION: 5.6.19
+        WP_CLI_IMAGE: ${MINIMUM_WP_CLI_IMAGE:-wordpress:cli-2.12.0-php8.3}
+        PHP_IMAGE: ${MINIMUM_PHP_IMAGE:-php:7.4.33-apache}
+    platform: linux/amd64
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8082:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MINIMUM_DB_NAME}
+      WORDPRESS_DB_USER: ${MINIMUM_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${MINIMUM_DB_PASSWORD}
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - minimum_wordpress_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts
+      - ./docker/wordpress/php-dev.ini:/usr/local/etc/php/conf.d/zz-welcart-dev.ini:ro
+      - ./docker/wordpress/dev-mail-sink.sh:/usr/local/bin/dev-mail-sink.sh:ro
+    networks:
+      - minimum
+
+volumes:
+  minimum_db_data:
+    name: welcart-tiered-discounts-minimum-db
+  minimum_wordpress_data:
+    name: welcart-tiered-discounts-minimum-wordpress
+
+networks:
+  minimum:
+    name: welcart-tiered-discounts-minimum

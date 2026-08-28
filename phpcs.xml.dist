@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="Welcart Tiered Discounts">
+	<description>WordPress Coding Standards for the plugin source.</description>
+
+	<rule ref="WordPress" />
+
+	<file>plugin</file>
+
+	<exclude-pattern>/vendor/</exclude-pattern>
+	<exclude-pattern>/runtime/</exclude-pattern>
+</ruleset>

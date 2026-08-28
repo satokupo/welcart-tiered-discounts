@@ -1,0 +1,98 @@
+name: welcart-tiered-discounts-recommended
+
+services:
+  db:
+    image: mysql:8.4.11
+    environment:
+      MYSQL_DATABASE: ${RECOMMENDED_DB_NAME}
+      MYSQL_USER: ${RECOMMENDED_DB_USER}
+      MYSQL_PASSWORD: ${RECOMMENDED_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${RECOMMENDED_DB_ROOT_PASSWORD}
+    volumes:
+      - recommended_db_data:/var/lib/mysql
+    networks:
+      - recommended
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mysqladmin ping -h 127.0.0.1 -u root
+          -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  wordpress:
+    image: wordpress:7.0.4-php8.3-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${RECOMMENDED_DB_NAME}
+      WORDPRESS_DB_USER: ${RECOMMENDED_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${RECOMMENDED_DB_PASSWORD}
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - recommended_wordpress_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts
+      - ./docker/wordpress/php-dev.ini:/usr/local/etc/php/conf.d/zz-welcart-dev.ini:ro
+      - ./docker/wordpress/dev-mail-sink.sh:/usr/local/bin/dev-mail-sink.sh:ro
+    networks:
+      - recommended
+
+  cli:
+    image: wordpress:cli-2.12.0-php8.3
+    user: "33:33"
+    depends_on:
+      wordpress:
+        condition: service_started
+    working_dir: /var/www/html
+    environment:
+      HOME: /tmp
+      WP_CLI_CACHE_DIR: /tmp/wp-cli-cache
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${RECOMMENDED_DB_NAME}
+      WORDPRESS_DB_USER: ${RECOMMENDED_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${RECOMMENDED_DB_PASSWORD}
+    entrypoint: [""]
+    command:
+      - tail
+      - -f
+      - /dev/null
+    volumes:
+      - recommended_wordpress_data:/var/www/html
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts
+    networks:
+      - recommended
+
+  quality:
+    build:
+      context: .
+      dockerfile: docker/quality/Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    environment:
+      HOME: /tmp/project-home
+      COMPOSER_HOME: /tmp/composer
+    working_dir: /workspace
+    command:
+      - tail
+      - -f
+      - /dev/null
+    volumes:
+      - .:/workspace
+    networks:
+      - recommended
+
+volumes:
+  recommended_db_data:
+    name: welcart-tiered-discounts-recommended-db
+  recommended_wordpress_data:
+    name: welcart-tiered-discounts-recommended-wordpress
+
+networks:
+  recommended:
+    name: welcart-tiered-discounts-recommended

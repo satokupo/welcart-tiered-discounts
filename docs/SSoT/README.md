@@ -41,14 +41,17 @@
 
 | 文書 | 何を書くか | 状態 |
 |---|---|---|
+| `ASSIGNMENT_REQUIREMENTS.md` | 課題提供者から指定された条件 | 作成済み |
 | `PRODUCT_DEFINITION.md` | 何のため・誰のため・どの困りごとを解消するか | 未着手 |
 | `MVP_SCOPE.md` | 最初にどこまで作るか／恒久的に作らないもの | 未着手 |
 | `FUNCTIONAL_SPEC.md` | 各機能がどう動くか（入力・計算・例外） | 未着手 |
 | `DATA_MODEL.md` | どんな情報をどういう形で持つか | 未着手 |
-| `TECH_STACK_AND_OPERATIONS.md` | 何で作り、どこでどう動かすか | 未着手 |
+| `TECH_STACK_AND_OPERATIONS.md` | 何で作り、どこでどう動かすか | 作成済み |
 | `DECISIONS.md` | 決定の索引（実体は `decisions/YYYY/MM/`） | 運用中 |
 
 **未着手・空欄・未掲載は「要件が存在しない」ことを意味しない**（未決・未整備を意味する）。
+
+環境の実測結果は SSoT ではなく [`docs/ENVIRONMENT_VERIFICATION.md`](../ENVIRONMENT_VERIFICATION.md) に記録する。実測前の項目は未実行のまま保持し、成功扱いにしない。
 
 ## 状況に応じて増やす文書
 
@@ -70,16 +73,18 @@
 
 | やること | 読む文書（順に） |
 |---|---|
+| 課題提供者が指定した条件を確認する | `ASSIGNMENT_REQUIREMENTS.md` |
 | 「これ作るんだっけ？」の判定 | `MVP_SCOPE.md` |
-| 機能を実装する | `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` →（データに触るなら）`DATA_MODEL.md` |
+| 機能を実装する | `ASSIGNMENT_REQUIREMENTS.md` → `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` →（データに触るなら）`DATA_MODEL.md` |
 | データ構造を変える | `DATA_MODEL.md` → `FUNCTIONAL_SPEC.md`（影響の確認） |
-| 環境構築・デプロイ | `TECH_STACK_AND_OPERATIONS.md` |
+| 環境構築・デプロイ | `ASSIGNMENT_REQUIREMENTS.md` → `TECH_STACK_AND_OPERATIONS.md` → `../ENVIRONMENT_VERIFICATION.md` |
 | 「なぜこうなっている？」に答える | `DECISIONS.md`（索引）→ 該当する `decisions/` の個別ファイル → `PRODUCT_DEFINITION.md` |
 
 ## 書く場所の判定表
 
 | 情報の種類 | 書く場所 |
 |---|---|
+| 課題提供者から指定された条件 | `ASSIGNMENT_REQUIREMENTS.md` |
 | 目的・対象・解消する困りごと | `PRODUCT_DEFINITION.md` |
 | 作る／作らないの線引き | `MVP_SCOPE.md` |
 | 機能の振る舞い・画面・計算式・例外 | `FUNCTIONAL_SPEC.md` |
