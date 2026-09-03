@@ -20,9 +20,15 @@ Welcart にカート合計金額に応じた自動割引機能を追加する、
 - `docs/work/`: 作業の進捗と記録
 - `docs/visdoc/`: 作業フレームなどの Markdown-first 資料
 
-## 正本への入口
+## プロジェクト正本への入口
 
-仕様・技術構成・判断の確認が必要な場合は、まず [`docs/SSoT/README.md`](docs/SSoT/README.md) を参照する。環境の実測結果は [`docs/ENVIRONMENT_VERIFICATION.md`](docs/ENVIRONMENT_VERIFICATION.md) に記録する。
+このプロジェクト固有の仕様・技術構成・設計判断を確認する場合は、まず [`docs/SSoT/README.md`](docs/SSoT/README.md) を参照する。環境の実測結果は [`docs/ENVIRONMENT_VERIFICATION.md`](docs/ENVIRONMENT_VERIFICATION.md) に記録する。
+
+## 外部技術知識の参照先
+
+- WordPress プラグインの設計・実装・レビューでは、WordPress 公式の `wp-plugin-development` Skill を第一参照先として使用する。Skill の内容をこのリポジトリの文書へ複製しない
+- Skill だけで判断できない、または WordPress の仕様・APIについて正確な確認が必要な場合は、WordPress 公式ドキュメントを参照する
+- WPCS 準拠の最終判定は推測で行わず、このリポジトリに設定された PHPCS / WordPressCS を実行して確認する
 
 ## 運用ルール
 
