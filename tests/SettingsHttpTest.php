@@ -100,6 +100,101 @@ final class SettingsHttpTest extends TestCase {
 	}
 
 	/**
+	 * Verify percentage form values are normalized once through the Settings API.
+	 *
+	 * @param string $initial_state Initial option state.
+	 * @param string $value         Percentage form value.
+	 * @param int    $stored_value  Expected hundredths-of-a-percent value.
+	 * @param string $display_value Expected redisplayed percentage.
+	 * @param string $discount      Expected discount for a 10,000 yen subtotal.
+	 * @return void
+	 * @dataProvider percentage_save_cases
+	 */
+	public function test_settings_api_persists_percentage_values_once(
+		string $initial_state,
+		string $value,
+		int $stored_value,
+		string $display_value,
+		string $discount
+	): void {
+		wtd_test_setup();
+		$original = $this->read_option_snapshot();
+
+		try {
+			if ( 'saved-empty' === $initial_state ) {
+				update_option( 'welcart_tiered_discounts', wtd_default_settings(), false );
+				$this->assertSame( wtd_default_settings(), $this->read_option_snapshot()['value'] );
+			} else {
+				delete_option( 'welcart_tiered_discounts' );
+				$this->assertFalse( $this->read_option_snapshot()['exists'] );
+			}
+			$this->clear_option_cache();
+
+			$admin  = $this->login_client( getenv( 'WTD_TEST_ADMIN_USER' ), getenv( 'WTD_TEST_ADMIN_PASSWORD' ) );
+			$page   = $admin->request( '/wp-admin/options-general.php?page=welcart-tiered-discounts' );
+			$fields = WtdTestHttp::formFields( $page['body'] );
+			$this->assertSame( 200, $page['status'] );
+
+			$save_fields = $this->tier_fields( $fields, '10000', 'percentage', $value, '1' );
+			$saved       = $admin->request( '/wp-admin/options.php', $save_fields );
+			$this->assertSame( 200, $saved['status'] );
+			$this->assertStringContainsString( 'settings-updated=true', $saved['url'] );
+
+			$stored = $this->read_option_snapshot();
+			$this->assertTrue( $stored['exists'] );
+			$this->assertSame(
+				array(
+					'schema_version' => 1,
+					'target'         => array( 'mode' => 'all' ),
+					'tiers'          => array(
+						array(
+							'threshold' => 10000,
+							'type'      => 'percentage',
+							'value'     => $stored_value,
+							'enabled'   => true,
+						),
+					),
+				),
+				$stored['value']
+			);
+			$this->assertSame( $discount, wtd_calculate( $stored['value']['tiers'], '10000' )['discount'] );
+
+			$redisplay        = $admin->request( '/wp-admin/options-general.php?page=welcart-tiered-discounts' );
+			$redisplay_fields = WtdTestHttp::formFields( $redisplay['body'] );
+			$this->assertSame( 200, $redisplay['status'] );
+			$this->assertSame( $display_value, $redisplay_fields['welcart_tiered_discounts[tiers][0][value]'] );
+
+			$resave_fields = $this->tier_fields(
+				$redisplay_fields,
+				$redisplay_fields['welcart_tiered_discounts[tiers][0][threshold]'],
+				$redisplay_fields['welcart_tiered_discounts[tiers][0][type]'],
+				$redisplay_fields['welcart_tiered_discounts[tiers][0][value]'],
+				'1'
+			);
+			$resaved = $admin->request( '/wp-admin/options.php', $resave_fields );
+			$this->assertSame( 200, $resaved['status'] );
+			$this->assertStringContainsString( 'settings-updated=true', $resaved['url'] );
+			$this->assertSame( $stored['value'], $this->read_option_snapshot()['value'] );
+		} finally {
+			$this->restore_option_snapshot( $original );
+		}
+	}
+
+	/**
+	 * Return percentage form values and option states that exercise one save.
+	 *
+	 * @return array<string,array{string,string,int,string,string}>
+	 */
+	public static function percentage_save_cases(): array {
+		return array(
+			'absent option 0.5 percent'      => array( 'absent', '0.5', 50, '0.50', '50' ),
+			'saved empty option 0.5 percent' => array( 'saved-empty', '0.5', 50, '0.50', '50' ),
+			'absent option 10 percent'       => array( 'absent', '10', 1000, '10', '1000' ),
+			'saved empty option 10 percent'  => array( 'saved-empty', '10', 1000, '10', '1000' ),
+		);
+	}
+
+	/**
 	 * Create an authenticated HTTP client.
 	 *
 	 * @param string|false $username WordPress login name.
@@ -187,5 +282,6 @@ final class SettingsHttpTest extends TestCase {
 	private function clear_option_cache(): void {
 		wp_cache_delete( 'welcart_tiered_discounts', 'options' );
 		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 }

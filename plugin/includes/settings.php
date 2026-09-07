@@ -393,13 +393,15 @@ function wtd_get_settings() {
 /**
  * Settings API sanitization callback.
  *
- * @param mixed $input Submitted form payload.
+ * @param mixed $input Submitted form payload or already normalized settings.
  * @return mixed Normalized settings or the original option on failure.
  */
 function wtd_sanitize_settings( $input ) {
 	$stored = wtd_settings_read_raw_option();
 	try {
-		return wtd_validate_settings( $input, true );
+		// update_option() may call add_option(), which sanitizes again. Form versions are strings; normalized versions are integers.
+		$form = ! ( is_array( $input ) && isset( $input['schema_version'] ) && is_int( $input['schema_version'] ) );
+		return wtd_validate_settings( $input, $form );
 	} catch ( InvalidArgumentException $exception ) {
 		$reason = wtd_settings_exception_reason( $exception );
 		wtd_settings_log_error( $reason, 'wtd_sanitize_settings' );
