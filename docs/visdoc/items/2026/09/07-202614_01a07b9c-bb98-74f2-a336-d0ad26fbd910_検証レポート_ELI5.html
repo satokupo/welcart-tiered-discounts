@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-09-07" />
+  <meta name="description" content="2026年9月7日の検証結果を、買い物の例と説明用デモで読む別版。" />
+  <title>Welcartの割引｜やさしい検証レポート</title>
+  <style>
+
+html {
+color: #1a1a1a;
+background-color: #fdfdfd;
+}
+body {
+margin: 0 auto;
+max-width: 36em;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 50px;
+padding-bottom: 50px;
+hyphens: auto;
+overflow-wrap: break-word;
+text-rendering: optimizeLegibility;
+font-kerning: normal;
+}
+@media (max-width: 600px) {
+body {
+font-size: 0.9em;
+padding: 12px;
+}
+h1 {
+font-size: 1.8em;
+}
+}
+@media print {
+html {
+background-color: white;
+}
+body {
+background-color: transparent;
+color: black;
+font-size: 12pt;
+}
+p, h2, h3 {
+orphans: 3;
+widows: 3;
+}
+h2, h3, h4 {
+page-break-after: avoid;
+}
+}
+p {
+margin: 1em 0;
+}
+a {
+color: #1a1a1a;
+}
+a:visited {
+color: #1a1a1a;
+}
+img {
+max-width: 100%;
+}
+svg {
+height: auto;
+max-width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+margin-top: 1.4em;
+}
+h5, h6 {
+font-size: 1em;
+font-style: italic;
+}
+h6 {
+font-weight: normal;
+}
+ol, ul {
+padding-left: 1.7em;
+margin-top: 1em;
+}
+li > ol, li > ul {
+margin-top: 0;
+}
+blockquote {
+margin: 1em 0 1em 1.7em;
+padding-left: 1em;
+border-left: 2px solid #e6e6e6;
+color: #606060;
+}
+code {
+white-space: pre-wrap;
+font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+font-size: 85%;
+margin: 0;
+hyphens: manual;
+}
+pre {
+margin: 1em 0;
+overflow: auto;
+}
+pre code {
+padding: 0;
+overflow: visible;
+overflow-wrap: normal;
+}
+.sourceCode {
+background-color: transparent;
+overflow: visible;
+}
+hr {
+border: none;
+border-top: 1px solid #1a1a1a;
+height: 1px;
+margin: 1em 0;
+}
+table {
+margin: 1em 0;
+border-collapse: collapse;
+width: 100%;
+overflow-x: auto;
+display: block;
+font-variant-numeric: lining-nums tabular-nums;
+}
+table caption {
+margin-bottom: 0.75em;
+}
+tbody {
+margin-top: 0.5em;
+border-top: 1px solid #1a1a1a;
+border-bottom: 1px solid #1a1a1a;
+}
+th {
+border-top: 1px solid #1a1a1a;
+padding: 0.25em 0.5em 0.25em 0.5em;
+}
+td {
+padding: 0.125em 0.5em 0.25em 0.5em;
+}
+header {
+margin-bottom: 4em;
+text-align: center;
+}
+#TOC li {
+list-style: none;
+}
+#TOC ul {
+padding-left: 1.3em;
+}
+#TOC > ul {
+padding-left: 0;
+}
+#TOC a:not(:hover) {
+text-decoration: none;
+}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Welcartの割引｜やさしい検証レポート</h1>
+<p class="date">2026-09-07</p>
+</header>
+<style>
+:root{--color-text:#141413;--color-surface:#faf9f5;--color-border:#e8e6dc;--color-info:#6a9bcc;--color-success:#788c5d;--color-warning:#d97757;--color-danger:#a13f1e;--radius-lg:18px;--space-lg:1.6rem}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:auto;max-width:1120px;padding:40px 28px 70px;background:var(--color-surface);color:var(--color-text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:19px;line-height:1.8}
+header#title-block-header{margin:0 0 28px}header .title{font-size:17px;font-weight:650;letter-spacing:.04em;margin:0}header .date{display:none}h2{font-size:clamp(27px,4.3vw,42px);line-height:1.4;margin:80px 0 14px;letter-spacing:-.025em}p{margin:0 0 16px}a{color:var(--color-danger);text-underline-offset:4px}strong{font-weight:800}.lead{font-size:21px;margin-bottom:28px}.note{font-size:15px;line-height:1.7;color:#55554f}.meta{font-size:14px;margin-bottom:20px}.hero{font-size:clamp(40px,7vw,72px);font-weight:850;line-height:1.25;letter-spacing:-.045em;margin:20px 0}.badge-ok,.badge-pending,.badge-ng{display:inline-block;padding:4px 13px;border:1px solid currentColor;border-radius:99px;font-size:15px;font-weight:750;line-height:1.6}.badge-ok{color:#405333}.badge-pending{color:var(--color-danger)}.badge-ng{color:#55554f}.grid-2,.grid-3{display:grid;gap:18px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{padding:28px;border:2px solid var(--color-border);border-radius:var(--radius-lg);background:white;min-width:0}.card p:last-child{margin-bottom:0}.card.success{border-color:var(--color-success)}.card.warning{border-color:var(--color-warning)}.card.info{border-color:var(--color-info)}.card .icon{font-size:48px;line-height:1.4;margin-bottom:10px}.card .big{display:block;font-size:clamp(30px,4vw,46px);font-weight:850;letter-spacing:-.04em;line-height:1.4}.card .label{font-size:16px;color:#55554f}.figure-frame{margin:26px 0}.figure-frame svg{display:block;width:100%;height:auto}.figure-caption{font-size:15px;color:#55554f;text-align:center;margin-top:12px}.math{display:grid;grid-template-columns:1fr auto 1fr auto 1.2fr;align-items:center;gap:14px;margin:28px 0}.math .card{text-align:center;padding:24px 12px}.math .operator{font-size:32px}.tier{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--color-border);padding:14px 0}.tier:last-child{border:0}.tier strong{font-size:22px}.demo{border:2px solid var(--color-info);border-radius:var(--radius-lg);padding:28px;background:white}.demo-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0}.demo-controls label{font-weight:750}select,button{font:inherit;min-height:48px;border:2px solid var(--color-text);border-radius:9px;padding:8px 18px;background:white;color:var(--color-text)}button{cursor:pointer;font-weight:700}button.primary{background:var(--color-text);color:white}button:disabled{cursor:not-allowed;color:#64645d;background:var(--color-border);border-color:var(--color-border)}:focus-visible{outline:3px solid var(--color-info);outline-offset:4px}#message{min-height:58px;font-weight:750;margin:18px 0}.result{font-size:38px;font-weight:850;line-height:1.5;display:block}#preview-card[data-stale=true]{border-color:var(--color-warning);border-style:dashed}.steps{display:flex;align-items:center;gap:15px;margin:24px 0;flex-wrap:wrap}.steps .card{flex:1;min-width:165px;text-align:center;padding:22px}.steps .arrow{font-size:27px}.stats .big{font-size:64px}.limits .card{padding:23px}.limits .card strong{display:block;font-size:23px;margin:12px 0 6px}details{margin-top:24px;border-top:1px solid var(--color-border);padding-top:18px;font-size:16px}summary{cursor:pointer;font-weight:700}details ul{padding-left:24px}footer{border-top:2px solid var(--color-border);margin-top:60px;padding-top:24px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}noscript .note{padding:18px;border:1px solid var(--color-warning)}
+@media(max-width:700px){body{padding:25px 18px 45px;font-size:18px}.grid-2,.grid-3{grid-template-columns:1fr}.math{grid-template-columns:1fr;gap:7px}.math .operator{text-align:center;line-height:1}.math .card{padding:18px}.math .big{font-size:40px}h2{margin-top:60px}.demo{padding:20px}.card{padding:23px}.steps{flex-direction:column;align-items:stretch}.steps .arrow{text-align:center;transform:rotate(90deg);line-height:1}.steps .card{min-width:0}.hero{font-size:45px}.figure-frame{overflow:hidden}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{max-width:none;padding:0;font-size:12pt}h2{margin-top:24pt}.card,.demo{break-inside:avoid}.demo-controls{display:none}details{display:block}a{color:inherit}.hero{font-size:36pt}}
+</style>
+<div class="meta">
+2026年9月7日の検証記録 · ELI5版 v1
+</div>
+<span class="badge-ok">主な検証環境で確認済み</span>
+<p class="hero">
+お会計の数字を、<br>最後までそろえる。
+</p>
+<p class="lead">
+「自動で値引きする機能」が、<br>注文の保存まで正しく働くかを調べました。
+</p>
+<h2 id="買った金額で割引が決まる">1. 買った金額で、割引が決まる</h2>
+<p class="lead">
+たとえば、商品が1万円なら500円引き。
+</p>
+<div class="math" role="group" aria-label="商品10,000円から500円を引くと、お支払いは9,500円">
+<div class="card">
+<span class="label">商品代金</span><strong class="big">10,000円</strong>
+</div>
+<span class="operator" aria-hidden="true">−</span>
+<div class="card">
+<span class="label">自動で割引</span><strong class="big">500円</strong>
+</div>
+<span class="operator" aria-hidden="true">＝</span>
+<div class="card success">
+<span class="label">お支払い</span><strong class="big">9,500円</strong>
+</div>
+</div>
+<div class="grid-2">
+<div class="card">
+<p>
+<strong>この説明で使う割引ルール</strong>
+</p>
+<div class="tier">
+<span>1万円より少ない</span><strong>割引なし</strong>
+</div>
+<div class="tier">
+<span>1万円以上</span><strong>500円引き</strong>
+</div>
+<div class="tier">
+<span>3万円以上</span><strong>2,000円引き</strong>
+</div>
+</div>
+<div class="card info">
+<div class="icon" aria-hidden="true">
+🪜
+</div>
+<p>
+<strong>届いた一番上の段を、1つだけ。</strong>
+</p>
+<p>
+3万円なら2,000円引き。<br>500円は足しません。
+</p>
+<p class="note">
+お店は金額引き・割合引きを設定できます。ここでは金額引きの例で説明します。
+</p>
+</div>
+</div>
+<p class="note">
+例の条件：1個1万円・税込10％。送料、手数料、利用ポイントは0。9,500円の中に税863円を含みます。
+</p>
+<h2 id="数を変えたらもう一度確認する">2.
+数を変えたら、もう一度確認する</h2>
+<p class="lead">
+古い割引のまま保存しないように、手前で止めます。
+</p>
+<div id="order-demo" class="demo">
+<span class="badge-pending">説明用デモ</span>
+<p class="note">
+検証した操作を簡略化しています。実際の注文は変わりません。
+</p>
+<div class="demo-controls">
+<label for="quantity">買う数</label><select id="quantity" disabled><option value="3">3個
+→ 商品3万円</option><option value="1">1個 → 商品1万円</option></select>
+</div>
+<div class="grid-2">
+<div id="preview-card" class="card info" data-stale="false">
+<span id="preview-label" class="label">確認したお会計（3個）</span>
+<output class="result" id="preview-total">
+28,000円
+</output>
+<span id="preview-discount">割引 2,000円</span>
+</div>
+<div id="saved-card" class="card">
+<span class="label">保存済みの注文</span>
+<output class="result" id="saved-total">
+28,000円
+</output>
+<span id="saved-quantity">3個・履歴0件</span>
+</div>
+</div>
+<p id="message" role="status" aria-live="polite">
+「1個」に変えてみてください。
+</p>
+<div class="demo-controls">
+<button id="recalculate" type="button" disabled>
+再計算する
+</button>
+<button id="save" class="primary" type="button" disabled>
+確認した金額を保存
+</button>
+<button id="reset" type="button" disabled>
+最初に戻す
+</button>
+</div>
+</div>
+<noscript>
+<p class="note">
+デモにはJavaScriptが必要です。流れは「3個・28,000円 → 1個へ変更 →
+再計算まで保存できない → 9,500円を確認 → 保存」です。
+</p>
+</noscript>
+<p class="note">
+本物の画面でも、再計算前は注文と履歴が変わらず、保存後は9,500円で一致しました。お店の割引ルールが後から変わっても、過去の注文の金額は自動では変わりません。
+</p>
+<h2 id="保存はまとめて失敗なら戻す">3.
+保存は「まとめて」。失敗なら戻す</h2>
+<p class="lead">
+金額だけ変わり、ほかが古いままになるのを防ぎます。
+</p>
+<figure class="figure-frame">
+<svg viewBox="0 0 900 180" role="img" aria-labelledby="bundle-title bundle-desc">
+<title id="bundle-title">
+注文に関わる情報をまとめて保存
+</title>
+<desc id="bundle-desc">金額、税、在庫、ポイント、履歴を一つの保存のまとまりとして扱います。</desc>
+<rect x="4" y="4" width="892" height="172" rx="22" fill="white" stroke="#6a9bcc" stroke-width="3" />
+<g fill="#141413" font-family="sans-serif" font-size="27" text-anchor="middle">
+<g transform="translate(102 44)"><path d="M-27 0H27V55L18 48 9 55 0 48-9 55-18 48-27 55Z" fill="#e8e6dc" /><text y="40" font-size="32">¥</text><text y="102">金額</text></g>
+<g transform="translate(276 44)"><rect x="-28" width="56" height="55" rx="7" fill="#e8e6dc" /><text y="39" font-size="29">％</text><text y="102">税</text></g>
+<g transform="translate(450 44)"><path d="M-30 12 0-3 30 12V49L0 63-30 49Z" fill="#e8e6dc" /><path d="M-30 12 0 26 30 12M0 26V63" fill="none" stroke="#141413" stroke-width="2" /><text y="102">在庫</text></g>
+<g transform="translate(624 44)"><circle cy="27" r="30" fill="#e8e6dc"></circle><text y="38" font-size="32">P</text><text y="102">ポイント</text></g>
+<g transform="translate(798 44)"><rect x="-26" width="52" height="59" rx="5" fill="#e8e6dc" /><path d="M-15 15H15M-15 28H15M-15 41H8" stroke="#141413" stroke-width="3" /><text y="102">履歴</text></g>
+</g>
+</svg>
+<figcaption class="figure-caption">
+保存のまとまりの図。対象の注文に関わる情報を一緒に扱います。
+</figcaption>
+</figure>
+<div class="grid-2">
+<div class="card success">
+<span class="badge-ok">保存できた</span>
+<div class="icon" aria-hidden="true">
+📦
+</div>
+<p>
+<strong>全部そろえて、新しい状態へ。</strong>
+</p>
+<p>
+元の注文も、変更の記録も残します。
+</p>
+</div>
+<div class="card warning">
+<span class="badge-pending">途中で失敗した</span>
+<div class="icon" aria-hidden="true">
+↩︎
+</div>
+<p>
+<strong>途中の変更を、元へ戻す。</strong>
+</p>
+<p>
+わざと保存を失敗させて確かめました。
+</p>
+</div>
+</div>
+<p class="note">
+二人が同じ注文を編集した場合も、後の人が古い内容で上書きしないことを確認しました。外部決済など、外部サービスで起きた処理の取り消しを保証するものではありません。
+</p>
+<h2 id="できたはテストで確かめた">4. 「できた」は、テストで確かめた</h2>
+<p class="lead">
+計算の試験と、実際の注文処理を通す試験を行いました。
+</p>
+<div class="grid-2 stats">
+<div class="card success">
+<span class="badge-ok">成功</span><strong class="big">68<span class="label"> テスト</span></strong>
+<p>
+<strong>計算・設定などの小さな試験</strong><br><span class="note">96個の確認。書き方の品質検査も通過。</span>
+</p>
+</div>
+<div class="card success">
+<span class="badge-ok">成功</span><strong class="big">52<span class="label"> テスト</span></strong>
+<p>
+<strong>購入・編集・保存をつなぐ試験</strong><br><span class="note">779個の確認。失敗や同時編集も含みます。</span>
+</p>
+</div>
+</div>
+<div class="steps" role="group" aria-label="TDDは、失敗を確かめてから直し、成功を確認する進め方です">
+<div class="card warning">
+<strong>失敗を見つける</strong>
+</div>
+<span class="arrow" aria-hidden="true">→</span>
+<div class="card">
+<strong>直す</strong>
+</div>
+<span class="arrow" aria-hidden="true">→</span>
+<div class="card success">
+<strong>成功を確かめる</strong>
+</div>
+</div>
+<p>
+たとえば、<strong>「商品を全部消したのに、ポイントが残る」</strong>。<br>テストで気づき、0になるように直しました。
+</p>
+<p class="note">
+この進め方をTDDと呼びます。AIの提案もテストで確認し、別のAIによるレビューも実施。画面操作と、無効化・再有効化で設定が残ることも確認しました。
+</p>
+<h2 id="確かめた範囲には境目がある">5. 確かめた範囲には、境目がある</h2>
+<p class="lead">
+よく試した環境と、確認しきれなかった環境を分けています。
+</p>
+<div class="grid-3 limits">
+<div class="card success">
+<span class="badge-ok">主環境：確認済み</span><strong>購入から保存まで</strong>
+<p>
+WordPress 7.0.4<br>Welcart 2.12.1
+</p>
+</div>
+<div class="card warning">
+<span class="badge-pending">最低版：一部確認</span><strong>注文保存まで成功</strong>
+<p>
+ブラウザ経由の操作と<br>メール本文は未確認。
+</p>
+</div>
+<div class="card warning">
+<span class="badge-pending">最新版：確認できず</span><strong>接続で止まった</strong>
+<p>
+データベースの<br>認証が合わなかった。
+</p>
+</div>
+</div>
+<div class="card warning" style="margin-top:18px">
+<strong>公式掲載用の検査には、指摘が1件残ります。</strong>
+<p class="note">
+新しいWordPress版での確認を求める指摘です。未検証の版を「確認済み」とは書いていません。
+</p>
+</div>
+<details>
+<summary>
+詳しい環境と、試していないこと
+</summary>
+<ul>
+<li>
+主環境：PHP 8.3.33 / MySQL 8.4.11。
+</li>
+<li>
+最低版：WordPress 5.6.19 / Welcart 2.12.1 / PHP 7.4.33 / MySQL
+5.5.62。内部の購入・保存処理を確認。
+</li>
+<li>
+最新版：WordPress 7.1 / PHP 8.5.9 /
+MySQLイメージ26.7.0。DB認証エラーで有効化・購入を確認できず。
+</li>
+<li>
+Plugin Check
+2.1.0は終了コード0でも、掲載用の指摘が1件。公式ディレクトリ掲載審査の合格ではありません。
+</li>
+<li>
+本番の決済・本物のメール配送は未実施。他の割引プラグインとの併用は保証範囲外です。
+</li>
+<li>
+カテゴリ・会員ランク別の割引、日英翻訳の完成は今回の対象外です。
+</li>
+</ul>
+</details>
+<footer>
+<p>
+<strong>元の検証レポートを、読みやすくした別版です。</strong>
+</p>
+<p class="note">
+このページ自体は再試験の結果ではありません。数値は2026年9月7日の元レポートから採用しています。図とデモは説明用で、実画面の証拠ではありません。
+</p>
+<p>
+<a href="../../../briefing/0907_Welcart割引実装/実装・検証レポート.html">元の検証レポートを読む
+→</a>
+</p>
+</footer>
+<script>
+(() => {
+const byId = id => document.getElementById(id);
+const quantity = byId('quantity'), recalculate = byId('recalculate'), save = byId('save'), reset = byId('reset');
+const prices = {1: {total: '9,500円', discount: '500円'}, 3: {total: '28,000円', discount: '2,000円'}};
+let checked = 3, saved = 3, history = 0;
+const message = text => { byId('message').textContent = text; };
+function render() {
+const dirty = Number(quantity.value) !== checked;
+byId('preview-card').dataset.stale = String(dirty);
+byId('preview-label').textContent = `${dirty ? '前の計算結果' : '確認したお会計'}（${checked}個）`;
+byId('preview-total').textContent = prices[checked].total;
+byId('preview-discount').textContent = `割引 ${prices[checked].discount}`;
+byId('saved-total').textContent = prices[saved].total;
+byId('saved-quantity').textContent = `${saved}個・履歴${history}件`;
+save.disabled = dirty || checked === saved;
+recalculate.disabled = !dirty;
+}
+quantity.disabled = false; reset.disabled = false;
+quantity.addEventListener('change', () => {
+render(); message(Number(quantity.value) !== checked ? '数が変わりました。再計算するまで、保存できません。' : '確認済みの数に戻りました。');
+});
+recalculate.addEventListener('click', () => {
+checked = Number(quantity.value); render(); message(`新しいお会計は${prices[checked].total}。保存済みの注文は、まだ変わりません。`);
+});
+save.addEventListener('click', () => {
+if (Number(quantity.value) !== checked || checked === saved) return;
+saved = checked; history += 1; render(); message(`確認した${prices[saved].total}を保存しました。元の注文と変更履歴も残ります。`);
+});
+reset.addEventListener('click', () => {
+quantity.value = '3'; checked = 3; saved = 3; history = 0; render(); message('「1個」に変えてみてください。');
+});
+render();
+})();
+</script>
+</body>
+</html>
