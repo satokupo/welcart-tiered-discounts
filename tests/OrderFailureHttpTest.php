@@ -309,8 +309,7 @@ final class OrderFailureHttpTest extends TestCase {
 
 	/** Submit a save while asking the local fixture to fail one named SQL. */
 	private function save_with_header( WtdTestHttp $http, int $order_id, array $fields, string $target ): array {
-		return $this->request_with_headers(
-			$http,
+		return $http->request(
 			$this->edit_post_path( $order_id ),
 			$fields,
 			array( 'X-WTD-Test-Fail-SQL: ' . $target )
@@ -349,67 +348,6 @@ final class OrderFailureHttpTest extends TestCase {
 		return array( '1', '2' );
 	}
 
-	/**
-	 * Send one authenticated form request with a custom header.
-	 *
-	 * WtdTestHttp intentionally keeps its transport surface small. Reflection
-	 * only reuses its private cookie jar; URL validation and redirect handling
-	 * remain restricted to the local C integration host here.
-	 */
-	private function request_with_headers( WtdTestHttp $client, string $path, array $fields, array $headers ): array {
-		$reflection = new ReflectionObject( $client );
-		$cookie_property = $reflection->getProperty( 'cookie_jar' );
-		$cookie_property->setAccessible( true );
-		$cookie_jar = $cookie_property->getValue( $client );
-		$url         = $this->local_url( $path );
-		$request     = $fields;
-		$redirects   = 0;
-
-		while ( $redirects <= 5 ) {
-			$location = null;
-			$handle   = curl_init( $url );
-			$this->assertNotFalse( $handle );
-			$options = array(
-				CURLOPT_CONNECTTIMEOUT => 5,
-				CURLOPT_COOKIEFILE => $cookie_jar,
-				CURLOPT_COOKIEJAR => $cookie_jar,
-				CURLOPT_FOLLOWLOCATION => false,
-				CURLOPT_HEADERFUNCTION => static function ( $handle, $header ) use ( &$location ) {
-					if ( preg_match( '/^Location:\s*(.+?)\s*$/i', $header, $matches ) ) {
-						$location = $matches[1];
-					}
-					return strlen( $header );
-				},
-				CURLOPT_HTTPHEADER => $headers,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_USERAGENT => 'WtdFailureHttp/1.0',
-			);
-			if ( null !== $request ) {
-				$options[ CURLOPT_POST ]       = true;
-				$options[ CURLOPT_POSTFIELDS ] = http_build_query( $request, '', '&' );
-			}
-			if ( defined( 'CURLOPT_CONNECT_TO' ) ) {
-				$options[ CURLOPT_CONNECT_TO ] = array( '127.0.0.1:8280:wordpress:80' );
-			}
-			curl_setopt_array( $handle, $options );
-			$body = curl_exec( $handle );
-			$this->assertNotFalse( $body, curl_error( $handle ) );
-			$status = (int) curl_getinfo( $handle, CURLINFO_RESPONSE_CODE );
-			curl_close( $handle );
-
-			if ( 300 <= $status && 400 > $status && null !== $location ) {
-				$url = $this->local_url( $location );
-				$request = null;
-				$redirects++;
-				continue;
-			}
-			return array( 'status' => $status, 'body' => (string) $body, 'url' => $url );
-		}
-
-		$this->fail( 'Too many local HTTP redirects.' );
-	}
-
 	/** Send two authenticated saves through curl_multi so they overlap. */
 	private function concurrent_saves( array $requests ): array {
 		$multi   = curl_multi_init();
@@ -419,7 +357,8 @@ final class OrderFailureHttpTest extends TestCase {
 			$reflection = new ReflectionObject( $client );
 			$cookie_property = $reflection->getProperty( 'cookie_jar' );
 			$cookie_property->setAccessible( true );
-			$handle = curl_init( $this->local_url( $this->edit_post_path( $this->order_id() ) ) );
+			$port = $client->port();
+			$handle = curl_init( $this->local_url( $this->edit_post_path( $this->order_id() ), $port ) );
 			$this->assertNotFalse( $handle );
 			$options = array(
 				CURLOPT_CONNECTTIMEOUT => 5,
@@ -434,7 +373,7 @@ final class OrderFailureHttpTest extends TestCase {
 				CURLOPT_USERAGENT => 'WtdFailureHttp/1.0',
 			);
 			if ( defined( 'CURLOPT_CONNECT_TO' ) ) {
-				$options[ CURLOPT_CONNECT_TO ] = array( '127.0.0.1:8280:wordpress:80' );
+				$options[ CURLOPT_CONNECT_TO ] = array( '127.0.0.1:' . $port . ':wordpress:80' );
 			}
 			curl_setopt_array( $handle, $options );
 			curl_multi_add_handle( $multi, $handle );
@@ -468,21 +407,21 @@ final class OrderFailureHttpTest extends TestCase {
 		return $responses;
 	}
 
-	/** Build a local-only URL from a relative admin path. */
-	private function local_url( string $value ): string {
+	/** Build a local-only URL from a relative admin path and validated port. */
+	private function local_url( string $value, int $port ): string {
 		if ( '' === $value ) {
 			$value = '/';
 		}
 		if ( 0 === strpos( $value, 'http://' ) || 0 === strpos( $value, 'https://' ) ) {
 			$url = $value;
 		} else {
-			$url = 'http://127.0.0.1:8280' . ( 0 === strpos( $value, '/' ) ? $value : '/' . $value );
+			$url = 'http://127.0.0.1:' . $port . ( 0 === strpos( $value, '/' ) ? $value : '/' . $value );
 		}
 		$parts = parse_url( $url );
 		$this->assertIsArray( $parts );
 		$this->assertSame( 'http', strtolower( $parts['scheme'] ?? '' ) );
 		$this->assertSame( '127.0.0.1', strtolower( $parts['host'] ?? '' ) );
-		$this->assertSame( 8280, (int) ( $parts['port'] ?? 80 ) );
+		$this->assertSame( $port, (int) ( $parts['port'] ?? 80 ) );
 		return $url;
 	}
 

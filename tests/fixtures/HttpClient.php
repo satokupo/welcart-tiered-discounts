@@ -131,6 +131,15 @@ if ( ! class_exists( 'WtdTestHttp' ) ) {
 		}
 
 		/**
+		 * Return the validated local integration port used by this client.
+		 *
+		 * @return int Local HTTP port.
+		 */
+		public function port() {
+			return $this->local_port;
+		}
+
+		/**
 		 * Extract named controls from a form.
 		 *
 		 * Control names are returned verbatim, including bracket syntax such as
