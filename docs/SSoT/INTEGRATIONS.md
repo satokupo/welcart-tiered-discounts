@@ -8,8 +8,7 @@
 - 実装対象版: [技術構成と運用](TECH_STACK_AND_OPERATIONS.md) の Welcart 2.12.1。
 - 公式入口: [関数一覧](https://www.welcart.com/documents/archives/functions)、[フック一覧](https://www.welcart.com/documents/archives/hooks)。下表は各個別ページを確認した内容。
 - 公開ページは特定版に固定したソースではない。下表のファイル名は文書上の案内で、対象版の行番号・引数・実行順序・挙動は未照合。
-- 現在の `plugin/` は `index.php` のみ。プラグインヘッダー、割引処理、Welcart 呼出しは未実装。**使用中・採用済みの Welcart 関数／フック／フィルタは 0 件**。
-- ローカルの起動中コンテナに本プロジェクトの環境は確認できず、今回、起動・注文操作・実コードの読取りは行っていない。既存の環境準備 PASS と今回の連携確認は別の証拠である。
+- 実装の進行状況とローカル環境の観測結果は、[実装前の確認記録](../work/todo/MVP_DESIGN_CHECKS.md#2026-09-07-要件整理時の観測) に置く。環境準備の PASS と割引連携の検証結果は区別する。
 
 ## 候補の一覧
 
