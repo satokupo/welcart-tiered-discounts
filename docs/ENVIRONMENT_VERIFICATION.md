@@ -178,3 +178,18 @@ Docker Hub の匿名 pull rate limit が発生したため、同一の固定タ�
 | 文書・Git 非汚染 | `PASS` |
 | 開発作業準備 | `PASS` |
 | 課題実装の計測開始 | `NOT_STARTED` |
+
+
+## 2026-09-07 Issue #4 実装時の環境確認
+
+上記の環境準備時の PASS と、今回の機能受入れを区別する。実装・HTTP 金額検証は独立した C（8280）へ `codex/issue4-implementation` のコードを接続して実施した。A と B の使用環境は切り替えていない。
+
+| 対象 | 実測と結果 |
+|---|---|
+| C / recommended | WordPress 7.0.4、Welcart ヘッダー 2.12.1、PHP 8.3.33、MySQL 8.4.11。設定・購入・ポイント・受注編集を実 WordPress で検証 |
+| minimum | WordPress 5.6.19、Welcart 2.12.1、PHP 7.4.33、MySQL 5.5.62。起動・版確認・有効化 exit 0。固定額計算および native カート→確認ゲート→注文保存の試行 exit 0（専用注文 1、商品 10,000／割引 500／請求 9,500） |
+| latest | WordPress 7.1、PHP 8.5.9、DB image `mysql:26.7.0`。起動・版確認 exit 0。ただし既存 DB volume の認証不一致（mysqli 1045）で有効化と購入経路の前提を満たせず exit 1。Welcart 版未取得 |
+| 補助環境の保持 | 通常 down を実行して停止（exit 0）、volume を保持。認証変更・reset・再初期化は行わない |
+| Plugin Check 2.1.0 | 実行 exit 0、出力内の ERROR は `outdated_tested_upto_header` 1 件。`Tested up to: 7.0` を実測範囲に留めるため、WordPress.org 掲載審査の合格とは扱わない |
+
+minimum の native 保存成功は、HTTP ブラウザ・メール本文や主環境の全試験成功を示すものではない。latest の DB 接続失敗を製品互換性の成功に読み替えない。操作・終了コード・金額と Red/Green の詳細、画面証拠は [実装・検証レポート](visdoc/briefing/0907_Welcart割引実装/実装・検証レポート.md) に集約する。作業時間を計測・算入して MVP 完成を判定しない。

@@ -8,7 +8,7 @@
 
 | 置く | 置かない（行き先） |
 |---|---|
-| 何を作るか（仕様） | やり方の手順 → `docs/` 配下・各 `README.md` |
+| 何を作るか（仕様） | 一般の操作手順 → `docs/` 配下・各 `README.md`（ローカル開発の手順は `LOCAL_DEVELOPMENT.md` に集約） |
 | どういう構造で作るか（設計） | どの順で進めるか → `docs/work/MILESTONES.md` |
 | なぜそう決めたか → `decisions/`（索引は `DECISIONS.md`） | 次に何をするか → `docs/work/todo/` |
 | | やったことと判断・変更の履歴 → `docs/work/log/` |
@@ -42,12 +42,15 @@
 | 文書 | 何を書くか | 状態 |
 |---|---|---|
 | `ASSIGNMENT_REQUIREMENTS.md` | 課題提供者から指定された条件 | 作成済み |
-| `PRODUCT_DEFINITION.md` | 何のため・誰のため・どの困りごとを解消するか | 未着手 |
-| `MVP_SCOPE.md` | 最初にどこまで作るか／恒久的に作らないもの | 未着手 |
-| `FUNCTIONAL_SPEC.md` | 各機能がどう動くか（入力・計算・例外） | 未着手 |
-| `DATA_MODEL.md` | どんな情報をどういう形で持つか | 未着手 |
+| `PRODUCT_DEFINITION.md` | 何のため・誰のため・どの困りごとを解消するか | 記入済み |
+| `MVP_SCOPE.md` | 最初にどこまで作るか／恒久的に作らないもの | 記入済み |
+| `FUNCTIONAL_SPEC.md` | 各機能がどう動くか（入力・計算・例外） | 登録価格基準・数値境界・入力再変更後の再計算と保存保護・画面配置を記入済み |
+| `DATA_MODEL.md` | どんな情報をどういう形で持つか | 設定構造、native 受注列、snapshot と追記履歴の物理保存先を記入済み |
 | `TECH_STACK_AND_OPERATIONS.md` | 何で作り、どこでどう動かすか | 作成済み |
-| `LOCAL_DEVELOPMENT.md` | ローカル開発の worktree・A〜E 環境・DB 更新の分離と統合 | 作成済み |
+| `LOCAL_DEVELOPMENT.md` | ローカル開発の運用方針・初回設定・起動停止・確認手順 | 作成済み |
+| `DEMO_PRODUCTS.md` | デモ商品の構成・価格と種類数の選定理由・検証例 | 記入済み |
+| `INTEGRATIONS.md` | 連携契約、公式 API の用途・参照先、責務の境界 | 対象版の実採用 API・署名・位置と候補一覧を分離して記載 |
+| `OPEN_QUESTIONS.md` | ユーザー確認の結果と、実装前の実測・後続機能の未決事項 | 追加回答と実装した技術契約の決定先を反映。後続詳細は残存 |
 | `DECISIONS.md` | 決定の索引（実体は `decisions/YYYY/MM/`） | 運用中 |
 
 **未着手・空欄・未掲載は「要件が存在しない」ことを意味しない**（未決・未整備を意味する）。
@@ -76,9 +79,13 @@
 |---|---|
 | 課題提供者が指定した条件を確認する | `ASSIGNMENT_REQUIREMENTS.md` |
 | 「これ作るんだっけ？」の判定 | `MVP_SCOPE.md` |
-| 機能を実装する | `ASSIGNMENT_REQUIREMENTS.md` → `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` →（データに触るなら）`DATA_MODEL.md` |
+| 機能を実装する | `ASSIGNMENT_REQUIREMENTS.md` → `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` → `OPEN_QUESTIONS.md` →（データに触るなら）`DATA_MODEL.md` |
 | データ構造を変える | `DATA_MODEL.md` → `FUNCTIONAL_SPEC.md`（影響の確認） |
+| ローカル環境の初回設定・起動停止・接続確認 | `LOCAL_DEVELOPMENT.md` |
+| デモ商品を準備する・価格の理由や検証例を確認する | `DEMO_PRODUCTS.md` → `LOCAL_DEVELOPMENT.md` |
 | 並列開発・worktree の環境割当・DB 更新 | `LOCAL_DEVELOPMENT.md` → `TECH_STACK_AND_OPERATIONS.md` →（製品データを変えるなら）`DATA_MODEL.md` |
+| Welcart の連携経路を調べる・変更する | `FUNCTIONAL_SPEC.md` → `INTEGRATIONS.md` → `OPEN_QUESTIONS.md` → 対象版のソース |
+| 未決事項と後続作業を確認する | `OPEN_QUESTIONS.md` → `../work/MILESTONES.md` → `../work/INDEX.md` |
 | 環境構築・デプロイ | `ASSIGNMENT_REQUIREMENTS.md` → `TECH_STACK_AND_OPERATIONS.md` → `../ENVIRONMENT_VERIFICATION.md` |
 | 「なぜこうなっている？」に答える | `DECISIONS.md`（索引）→ 該当する `decisions/` の個別ファイル → `PRODUCT_DEFINITION.md` |
 
@@ -90,9 +97,13 @@
 | 目的・対象・解消する困りごと | `PRODUCT_DEFINITION.md` |
 | 作る／作らないの線引き | `MVP_SCOPE.md` |
 | 機能の振る舞い・画面・計算式・例外 | `FUNCTIONAL_SPEC.md` |
+| デモ商品の構成・選定理由・検証例 | `DEMO_PRODUCTS.md` |
 | 情報の構造・項目・つながり・アクセス制御 | `DATA_MODEL.md` |
 | 技術スタック・認証・実行環境・鍵の管理方針 | `TECH_STACK_AND_OPERATIONS.md` |
-| ローカル開発のコード・環境・DB の分離と統合 | `LOCAL_DEVELOPMENT.md` |
+| ローカル開発の運用方針・初回設定・起動停止・確認手順 | `LOCAL_DEVELOPMENT.md` |
+| 既存 API の用途、参照先、候補と採用、連携根拠 | `INTEGRATIONS.md` |
+| 仕様上の確認事項と解決先 | `OPEN_QUESTIONS.md` |
+| 後続機能の内容・優先順・未完了作業 | `../work/todo/`・`../work/MILESTONES.md` |
 | 決定とその理由 | `decisions/YYYY/MM/` に1ファイル＋`DECISIONS.md` 索引に1行 |
 | AI が毎回認識すべき行動ルール | `AGENTS.md`（常時有効なものだけ） |
 | 上記に当てはまらない仕様・設計 | 意味名の文書を新設して文書マップに登録 |
@@ -111,6 +122,7 @@
 
 | 変更 | 連動して直すもの |
 |---|---|
+| デモ商品の構成・コード・価格の変更 | `DEMO_PRODUCTS.md` と投入用データ・`LOCAL_DEVELOPMENT.md` の投入手順を照合し、同じ作業で整合させる |
 | SSoT 文書の追加・削除・改名・役割変更 | 本書の文書マップ・書く場所の判定表・タスク別の読み順 |
 | 文書を書き終えた／大きく書き換えた | 本書の文書マップの状態欄 |
 | 仕様・設計の非自明な判断 | `decisions/YYYY/MM/` に個別ファイルを作成し、`DECISIONS.md` 索引にも1行足す（**片方だけで終わらせない**） |

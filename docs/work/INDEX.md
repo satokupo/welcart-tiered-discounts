@@ -36,3 +36,15 @@
 
 - 2026-08-09 申込一覧の絞り込み — done/申込一覧の絞り込み.md
 -->
+
+## M2 要件・連携・画面を確定する（完了）
+
+- MVP 実装前の確認 — [todo/MVP_DESIGN_CHECKS.md](todo/MVP_DESIGN_CHECKS.md)
+
+## M3 MVP を TDD で実装し提出物を揃える（完了）
+
+- 実装・検証レポート — [資料](../visdoc/briefing/0907_Welcart割引実装/実装・検証レポート.md)
+
+## MVP 後の候補
+
+- 追加機能の詳細 — [todo/POST_MVP.md](todo/POST_MVP.md)

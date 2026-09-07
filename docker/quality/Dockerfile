@@ -14,7 +14,7 @@ RUN set -eux; \
         libxml2-dev \
         libzip-dev \
         unzip; \
-    docker-php-ext-install -j"$(nproc)" curl dom mbstring zip; \
+    docker-php-ext-install -j"$(nproc)" curl dom mbstring mysqli zip; \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer

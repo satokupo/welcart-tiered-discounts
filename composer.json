@@ -32,7 +32,7 @@
         "quality": [
             "@lint",
             "@phpcs",
-            "@phpunit:config"
+            "@phpunit --exclude-group integration"
         ]
     }
 }

@@ -1,0 +1,30 @@
+ Container welcart-tiered-discounts-c-db-1 Running
+ Container welcart-tiered-discounts-c-wordpress-1 Running
+ Container welcart-tiered-discounts-c-db-1 Waiting
+ Container welcart-tiered-discounts-c-db-1 Healthy
+ Container welcart-tiered-discounts-c-quality-run-678925249090 Creating
+ Container welcart-tiered-discounts-c-quality-run-678925249090 Created
+Composer could not detect the root package (satokupo/welcart-tiered-discounts) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+Installing dependencies from lock file (including require-dev)
+Verifying lock file contents can be installed on current platform.
+Nothing to install, update or remove
+Generating optimized autoload files
+31 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+Composer could not detect the root package (satokupo/welcart-tiered-discounts) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+PHPUnit 9.6.36 by Sebastian Bergmann and contributors.
+
+F                                                                   1 / 1 (100%)
+
+Time: 00:00.005, Memory: 54.50 MB
+
+There was 1 failure:
+
+1) OrderNativeEdgeTest::test_empty_order_does_not_borrow_the_administrators_shopping_cart
+Failed asserting that 10000.0 is identical to 0.0.
+
+/workspace/tests/OrderNativeEdgeTest.php:22
+
+FAILURES!
+Tests: 1, Assertions: 2, Failures: 1.
+Script @php ./vendor/bin/phpunit --configuration phpunit.xml.dist handling the phpunit event returned with error code 1
