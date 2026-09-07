@@ -4,7 +4,7 @@
 
 ## リポジトリ概要
 
-Welcart にカート合計金額に応じた自動割引機能を追加する、独立した WordPress プラグインの開発リポジトリ。Welcart 本体・WordPress テーマのファイルを改変せず、公開された拡張経路を利用する。
+Welcart に商品代金に応じた段階式の自動割引機能を追加する、独立した WordPress プラグインの開発リポジトリ。Welcart 本体・WordPress テーマのファイルを改変せず、公開された拡張経路を利用する。
 
 ## プロジェクトルート
 
@@ -35,16 +35,13 @@ Welcart にカート合計金額に応じた自動割引機能を追加する、
 - **着手前に SSoT**: 仕様確認・設計・実装・相談の前に `docs/SSoT/README.md`（仕様・設計の正本の索引）を開き、読むべき文書を判定する
 - **条件付きRuleは分散配置**: 指示であって資料でないもの（読むとAIの次の行動が変わるもの）は `.agents/conditional-rules/` へ置き、下記routerへ1行追加する。本文をこのファイルなど常時読み込まれる場所へ複製しない
 
+- **仕様の境界**: 課題提供者の指定は `docs/SSoT/ASSIGNMENT_REQUIREMENTS.md`、今回の採用範囲は `docs/SSoT/MVP_SCOPE.md` を正本とする。未決・提案は `docs/SSoT/OPEN_QUESTIONS.md`、後続候補と順序は `docs/work/` へ分け、MVP の要求へ混ぜない
+- **実測と採用の区別**: 公開リファレンスの候補を採用済みと扱わない。環境準備の検証結果を割引機能の受入れ結果へ読み替えない
+
 ## 条件付きRule router
 
 次のpathはリポジトリルートからの相対path。発火条件に一致する文書だけを読み、無関係な文書は読まない。
 
 | 発火条件 | 1行概要 | path |
 |---|---|---|
-
-<!--
-row例:
-| データモデルを変更するとき | 連動更新の手順 | `.agents/conditional-rules/data-model.md` |
-
-条件付きRuleを追加したら、上の表へ1行追加すること。
--->
+| 割引プラグインの設計・実装・レビュー・検証を行うとき | TDD、連携根拠、UI 確認、提出用の検証を揃える。 | `.agents/conditional-rules/plugin-development.md` |
