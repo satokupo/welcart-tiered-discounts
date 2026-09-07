@@ -1,10 +1,19 @@
-# ローカル開発・worktree・DB更新の運用方針
+# ローカル開発の運用方針と操作手順
 
 ## 目的と正本の境界
 
 プライマリ worktree は dev を使用し、dev を開発の統合・検証先、main を提出可能な安定版とする。作業用 worktree で並列に開発する。コードだけでなく開発途中の DB 変更も他の作業から分離し、タスクごとの WordPress 再インストールを避ける。
 
-本書は、ブランチ・worktree・開発環境の対応とデータ更新方針の正本。ソフトウェアの版、検証プロファイル、品質検査、安全境界は [技術構成と運用](TECH_STACK_AND_OPERATIONS.md)、製品データの意味は [データモデル](DATA_MODEL.md) が所有する。具体的な起動コマンドは root README、実装状況と残作業は `docs/work/` で管理する。
+本書は、ブランチ・worktree・開発環境の対応、データ更新方針、ローカル環境の初回設定・起動・停止・確認手順の正本。ソフトウェアの版、検証プロファイル、品質検査の基準、安全境界は [技術構成と運用](TECH_STACK_AND_OPERATIONS.md)、製品データの意味は [データモデル](DATA_MODEL.md) が所有する。操作手順は本書へ集約し、root README は本書への案内だけを持つ。実装状況と残作業は `docs/work/` で管理する。
+
+## 操作手順への入口
+
+- 初めて使う: [前提](#前提) → [初回のローカル設定](#初回のローカル設定) → [初回のセットアップ](#初回のセットアップ)
+- 普段使う: [日常の起動とブラウザ表示](#日常の起動とブラウザ表示)
+- 開けない: [接続できない場合](#接続できない場合)
+- 終了する: [停止・リセット・補助環境](#停止リセット補助環境)
+
+本書のコマンドは、特記がない限り対象リポジトリのルートで実行する。
 
 ## ブランチ・worktree・環境の関係
 
@@ -70,3 +79,179 @@ Git で古いコードへ戻しても DB は自動では元に戻らない。コ
 各環境のテスト注文や作業途中の設定を、他の DB へマージする必要はない。共通して必要な初期設定・検証商品は、再現可能な投入手順またはデータとして管理する。環境を揃えるために毎回 DB 全体を上書きする方式は採らない。
 
 製品の動作に必要なデータ形式変更と、検証用データの投入を区別する。前者はコードと共に配布する更新処理、後者はローカル開発用の準備として扱う。
+
+## 前提
+
+ホスト側に次のものを用意してください。
+
+- Docker Desktop または Docker Engine
+- Docker Compose v2（`docker compose` サブコマンド）
+- Git
+- WordPress 管理画面・ショップ画面を確認するブラウザ
+
+PHP、Composer、PHP_CodeSniffer、WPCS、PHPUnit、WP-CLI はホストへグローバル導入せず、Docker の品質ツールまたは各 WordPress コンテナから実行します。Apple Silicon では品質ツールと `recommended` / `latest` は native arm64、`minimum` の MySQL 5.5.62 だけは `linux/amd64` emulation を使用します。
+
+環境プロファイルの固定版と検証基準は [技術構成と運用](TECH_STACK_AND_OPERATIONS.md#検証環境プロファイル) を参照する。
+
+## 初回のローカル設定
+
+ローカル専用の認証情報は `docker/local.env` に置きます。初回だけ次を実行してください。
+
+```sh
+./scripts/dev.sh recommended init
+```
+
+このコマンドは、コミット可能な [`docker/local.env.example`](../../docker/local.env.example) から `docker/local.env` を生成します。`docker/local.env` は `.gitignore` 対象です。実用の認証情報、本番・個人サービスの値、外部 SMTP の認証情報は設定しないでください。サンプルや文書へ秘密値を転記しないでください。
+
+## 初回のセットアップ
+
+初回のローカル設定を作成した後、対象リポジトリのルートで次を実行する。
+
+```sh
+./scripts/dev.sh recommended config
+./scripts/dev.sh recommended up db wordpress
+./scripts/dev.sh recommended bootstrap
+```
+
+`bootstrap` は WordPress・Welcart とローカル設定をセットアップする。日常の起動では再実行しない。WordPress 本体・Welcart 本体・テーマは Docker volume 内へ展開し、リポジトリへ取り込まない。
+
+## 日常の起動とブラウザ表示
+
+1. Docker Desktop を起動し、Docker Engine が利用できる状態にする。
+2. 起動するコードのリポジトリルートをターミナルで開く。プライマリ worktree の場合は次の場所を使う。
+
+   ```sh
+   cd /Volumes/S/Works/welcart-tiered-discounts
+   ```
+
+3. A 環境（8080）の WordPress と DB を起動する。
+
+   ```sh
+   ./scripts/dev.sh recommended up db wordpress
+   ```
+
+4. DB の起動確認を待って WordPress が起動したら、[ショップ](http://127.0.0.1:8080) または [管理画面](http://127.0.0.1:8080/wp-admin/) を外部ブラウザで開く。接続エラーのタブを開いている場合は再読み込みする。
+
+この起動は保存済みの WordPress と DB を使用し、初期化・データ削除を行わない。ブラウザ表示だけなら WP-CLI・品質ツールの常駐コンテナは不要である。
+
+`recommended` は `compose.yaml` の固定ポート 8080 を使用する。`dev.sh` の環境引数は `recommended`・`latest`・`minimum` であり、B〜E の選択には使わない。別 worktree から同じコマンドを実行しても独立環境にはならないため、[環境の再利用](#環境の再利用)に従って接続するコードと保存領域の割当を確認する。
+
+### 接続できない場合
+
+`ERR_CONNECTION_REFUSED` は、その URL でサーバーに接続できていない状態である。A 環境の URL と Docker Engine の起動を確認し、次で対象コンテナの状態を調べる。
+
+```sh
+docker ps -a --filter label=com.docker.compose.project=welcart-tiered-discounts-recommended --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+```
+
+WordPress または DB が停止していたら、上の起動手順を実行する。起動に失敗する場合は、次のログで原因を確認する。
+
+```sh
+./scripts/dev.sh recommended logs --tail=100 db wordpress
+```
+
+`docker/local.env is missing` と表示された場合は、[初回のローカル設定](#初回のローカル設定)を行う。接続確認には次を使用できる。
+
+```sh
+curl --max-time 10 --silent --show-error --output /dev/null --write-out 'HTTP %{http_code}\n' http://127.0.0.1:8080
+```
+
+接続拒否を直す目的で `reset` や再インストールを行わない。
+
+## 停止・リセット・補助環境
+
+各プロファイルは別の Compose project、network、volume、loopback port を使う。通常の停止では volume を削除しない。
+
+```sh
+# 通常停止（volume は保持）
+./scripts/dev.sh recommended down
+```
+
+`reset` は対象環境のデータを削除する操作である。必要な検証記録を保存し、削除対象を確認して明示的に初期化するときだけ実行する。
+
+```sh
+./scripts/dev.sh recommended reset
+```
+
+補助環境を試行するときは対象を明示する。`bootstrap` は各環境の初回セットアップ時に実行する。
+
+```sh
+./scripts/dev.sh latest up
+./scripts/dev.sh latest bootstrap
+./scripts/dev.sh minimum up
+./scripts/dev.sh minimum bootstrap
+```
+
+## ソースマウント
+
+ホストの `plugin/` が各環境の次の同一 slug へ bind mount されます。
+
+```text
+/var/www/html/wp-content/plugins/welcart-tiered-discounts
+```
+
+ホストで `plugin/` を編集すると、コンテナ内の同じファイルへ即時反映されます。WordPress 本体、Welcart 本体、テーマのソースをこのリポジトリへコピーしたり、直接改変したりしません。
+
+## 初期化後の確認
+
+`recommended` の初期化は、標準の WordPress 管理画面とショップ画面から確認します。管理者認証は `docker/local.env` のローカル値を使用してください。
+
+1. `http://127.0.0.1:8080` と `/wp-admin/` をブラウザで開く。
+2. WordPress が日本語、Asia/Tokyo、JPY のローカル設定になっていることを確認する。
+3. Welcart が有効で、カート・会員などの初期ページと商品カテゴリが生成されていることを確認する。
+4. 管理画面の通常操作で、ダミー店舗、配送方法、オフライン決済、既知価格の商品を設定する。
+5. ショップ画面から商品をカートへ追加し、カート、購入確認、注文確定、受注データの確認まで進む。
+6. 注文番号と割引を含めない基準金額を [環境の実測記録](../ENVIRONMENT_VERIFICATION.md) に記録する。
+
+これは環境の基準経路を確認する操作であり、割引仕様や割引機能の受入れを行うものではありません。Welcart 内部のデータベースへ推測で直接書き込まず、管理画面と標準の注文経路を利用します。
+
+## バージョン・ログ確認
+
+```sh
+./scripts/dev.sh recommended versions
+./scripts/dev.sh latest versions
+./scripts/dev.sh minimum versions
+
+./scripts/dev.sh recommended logs
+```
+
+`versions` の結果には、WordPress、PHP、MySQL、Welcart、WP-CLI、テーマの実測版を残します。固定 image の初回取得時に観測した image digest（multi-arch index が存在する場合は index digest）も検証記録へ転記します。
+
+WordPress の debug log、PHP error log、container log はローカルで読める状態にし、PHP の `sendmail_path` はローカル mail sink または決定論的な抑止経路へ向けます。外部 SMTP や外部メール配送は構成しません。
+
+## 品質検査
+
+品質検査は PHP 8.3.33 と Composer 2.10.2 を備えた専用コンテナから project-local 依存を使って実行します。
+
+```sh
+# Compose YAML の構文・展開検査
+./scripts/dev.sh recommended config
+./scripts/dev.sh latest config
+./scripts/dev.sh minimum config
+
+# Composer、PHP lint、PHPCS / WPCS、PHPUnit runner の入口
+./scripts/dev.sh recommended quality
+
+# WordPress 上で Plugin Check の入口を確認（bootstrap 後）
+./scripts/dev.sh recommended wp plugin check --help
+
+# WP-CLI で個別の状態を確認
+./scripts/dev.sh recommended wp core version
+./scripts/dev.sh recommended wp plugin list
+./scripts/dev.sh recommended wp theme list
+```
+
+`quality` は `composer validate --strict`、lock からの依存導入、platform requirements、PHP lint、WPCS、PHPUnit runner の設定読込みをまとめて確認します。Plugin Check は WordPress 上の WP-CLI コマンドとして別に入口を確認します。環境準備では機能テストや割引処理を追加しません。
+
+## 検証記録
+
+21項目の受入記録は [環境の実測記録](../ENVIRONMENT_VERIFICATION.md) を使います。各項目に次を実測して記入してください。
+
+- 実行したコマンドまたはブラウザ操作
+- 終了コード
+- WordPress、PHP、MySQL、Welcart、テーマ、WP-CLI、Browser の実測版
+- image digest と architecture
+- `PASS` / `FAIL` / `BLOCKED` と理由
+- 実測時刻、関連ログ、スクリーンショットまたは画面記録への参照
+
+`recommended` の必須項目がすべて成立し、`latest` と `minimum` の試行結果、品質入口、Git 非汚染、文書整合を記録できた時点で、環境準備完了を判定します。課題実装の作業時間はその後に計測します。
