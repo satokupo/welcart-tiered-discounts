@@ -47,6 +47,7 @@
 | `FUNCTIONAL_SPEC.md` | 各機能がどう動くか（入力・計算・例外） | 未着手 |
 | `DATA_MODEL.md` | どんな情報をどういう形で持つか | 未着手 |
 | `TECH_STACK_AND_OPERATIONS.md` | 何で作り、どこでどう動かすか | 作成済み |
+| `LOCAL_DEVELOPMENT.md` | ローカル開発の worktree・A〜E 環境・DB 更新の分離と統合 | 作成済み |
 | `DECISIONS.md` | 決定の索引（実体は `decisions/YYYY/MM/`） | 運用中 |
 
 **未着手・空欄・未掲載は「要件が存在しない」ことを意味しない**（未決・未整備を意味する）。
@@ -77,6 +78,7 @@
 | 「これ作るんだっけ？」の判定 | `MVP_SCOPE.md` |
 | 機能を実装する | `ASSIGNMENT_REQUIREMENTS.md` → `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` →（データに触るなら）`DATA_MODEL.md` |
 | データ構造を変える | `DATA_MODEL.md` → `FUNCTIONAL_SPEC.md`（影響の確認） |
+| 並列開発・worktree の環境割当・DB 更新 | `LOCAL_DEVELOPMENT.md` → `TECH_STACK_AND_OPERATIONS.md` →（製品データを変えるなら）`DATA_MODEL.md` |
 | 環境構築・デプロイ | `ASSIGNMENT_REQUIREMENTS.md` → `TECH_STACK_AND_OPERATIONS.md` → `../ENVIRONMENT_VERIFICATION.md` |
 | 「なぜこうなっている？」に答える | `DECISIONS.md`（索引）→ 該当する `decisions/` の個別ファイル → `PRODUCT_DEFINITION.md` |
 
@@ -90,6 +92,7 @@
 | 機能の振る舞い・画面・計算式・例外 | `FUNCTIONAL_SPEC.md` |
 | 情報の構造・項目・つながり・アクセス制御 | `DATA_MODEL.md` |
 | 技術スタック・認証・実行環境・鍵の管理方針 | `TECH_STACK_AND_OPERATIONS.md` |
+| ローカル開発のコード・環境・DB の分離と統合 | `LOCAL_DEVELOPMENT.md` |
 | 決定とその理由 | `decisions/YYYY/MM/` に1ファイル＋`DECISIONS.md` 索引に1行 |
 | AI が毎回認識すべき行動ルール | `AGENTS.md`（常時有効なものだけ） |
 | 上記に当てはまらない仕様・設計 | 意味名の文書を新設して文書マップに登録 |
