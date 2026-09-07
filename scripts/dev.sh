@@ -21,6 +21,7 @@ Commands:
   logs       Show logs for the selected environment.
   versions   Show runtime and installed plugin versions.
   quality    Run project-local Composer and quality checks (recommended only).
+  integration Run tests against the assigned local WordPress (recommended only).
 USAGE
 }
 
@@ -87,6 +88,14 @@ if [[ ! -f "${compose_file}" ]]; then
 fi
 
 compose=(docker compose --env-file "${ENV_FILE}" -f "${compose_file}")
+
+if [[ "${command}" == "integration" ]]; then
+    if [[ "${environment}" != "recommended" ]]; then
+        printf '%s\n' 'Integration is available only in recommended.' >&2
+        exit 64
+    fi
+    compose+=(-f "${ROOT_DIR}/compose.integration.yaml")
+fi
 
 run_wp() {
     if [[ "${environment}" == "minimum" ]]; then
@@ -172,6 +181,10 @@ case "${command}" in
         run_wp core version
         printf '%s\n' 'Welcart:'
         run_wp plugin get usc-e-shop --field=version 2>/dev/null || true
+        ;;
+    integration)
+        "${compose[@]}" up -d wordpress
+        "${compose[@]}" run --rm quality bash -lc 'composer install --no-interaction --prefer-dist --no-progress && composer phpunit -- --group integration "$@"' -- "$@"
         ;;
     quality)
         if [[ "${environment}" != "recommended" ]]; then

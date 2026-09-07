@@ -1,0 +1,20 @@
+services:
+  wordpress:
+    environment:
+      WTD_TEST_MODE: "1"
+    volumes:
+      - ./tests/fixtures/wtd-test.php:/var/www/html/wp-content/mu-plugins/wtd-test.php:ro
+  quality:
+    environment:
+      WTD_TEST_MODE: "1"
+      WTD_TEST_PORT: ${WTD_PORT:-8080}
+      WTD_TEST_ADMIN_USER: ${RECOMMENDED_WP_ADMIN_USER}
+      WTD_TEST_ADMIN_PASSWORD: ${RECOMMENDED_WP_ADMIN_PASSWORD}
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${RECOMMENDED_DB_NAME}
+      WORDPRESS_DB_USER: ${RECOMMENDED_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${RECOMMENDED_DB_PASSWORD}
+    volumes:
+      - recommended_wordpress_data:/var/www/html:ro
+      - ./plugin:/var/www/html/wp-content/plugins/welcart-tiered-discounts:ro
+      - ./tests/fixtures/wtd-test.php:/var/www/html/wp-content/mu-plugins/wtd-test.php:ro

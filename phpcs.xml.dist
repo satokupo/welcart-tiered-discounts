@@ -3,6 +3,13 @@
 	<description>WordPress Coding Standards for the plugin source.</description>
 
 	<rule ref="WordPress" />
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="wel_manage_order" />
+			</property>
+		</properties>
+	</rule>
 
 	<file>plugin</file>
 
