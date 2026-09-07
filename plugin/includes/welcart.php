@@ -240,7 +240,7 @@ function wtd_is_reduced_line( $line ) {
 }
 
 /**
- * Apply the verified Welcart rate formula and its existing rounding function.
+ * Delegate one validated tax base to Welcart using historical rate and rounding.
  *
  * @param float $base Taxable amount.
  * @param mixed $rate Percentage rate.
@@ -252,15 +252,35 @@ function wtd_native_tax( $base, $rate, $condition ) {
 	if ( ! is_numeric( $rate ) || $rate < 0 || $rate > 100 || ! in_array( $condition['tax_method'], array( 'cutting', 'bring', 'rounding' ), true ) ) {
 		throw new InvalidArgumentException( 'invalid_snapshot' );
 	}
-	$divisor = 'include' === $condition['tax_mode'] ? 100 + (float) $rate : 100;
-	$raw     = (float) sprintf( '%.3f', max( 0, $base ) * (float) $rate / $divisor );
-	if ( 'include' === $condition['tax_mode'] && ( ! isset( $condition['applicable_taxrate'] ) || 'reduced' !== $condition['applicable_taxrate'] ) ) {
-		$raw = max( 0, $base ) - max( 0, $base ) / ( 1 + (float) $rate / 100 );
+	global $usces;
+	$old_options = $usces->options;
+	try {
+		// This base already includes the selected rate's discount, fees and points.
+		// Calling the cart-wide API would re-read current SKUs and lose draft tax classes.
+		$usces->options = array_replace(
+			$usces->options,
+			$condition,
+			array(
+				'applicable_taxrate' => 'standard',
+				'tax_rate'           => $rate,
+				'tax_display'        => $condition['tax_display'] ?? 'activate',
+			)
+		);
+		if ( 'include' === $condition['tax_mode'] && ( ! isset( $condition['applicable_taxrate'] ) || 'reduced' !== $condition['applicable_taxrate'] ) ) {
+			$materials = array(
+				'total_items_price' => max( 0, $base ),
+				'discount'          => 0,
+				'shipping_charge'   => 0,
+				'cod_fee'           => 0,
+				'use_point'         => 0,
+				'condition'         => $usces->options,
+			);
+			return (float) usces_internal_tax( $materials, 'return' );
+		}
+		return $usces->getTax( max( 0, $base ) );
+	} finally {
+		$usces->options = $old_options;
 	}
-	if ( isset( $condition['tax_display'] ) && 'deactivate' === $condition['tax_display'] ) {
-		return 0;
-	}
-	return usces_tax_rounding_off( $raw, $condition['tax_method'] );
 }
 
 /**

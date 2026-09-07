@@ -5,6 +5,21 @@ use PHPUnit\Framework\TestCase;
 /** @group integration */
 final class OrderPreviewTest extends TestCase
 {
+    public function test_native_recalculation_scripts_only_bridge_snapshot_orders(): void
+    {
+        global $usces;
+        $id = (int) get_option('wtd_test_saved_order_id');
+        $this->assertGreaterThan(0, $id, 'Run the native order seed first.');
+        foreach (['order_edit_form_recalculation', 'order_edit_form_recalculation_reduced'] as $hook) {
+            $this->assertNotFalse(has_filter($hook, 'wtd_order_recalculation_script'));
+            $this->assertSame('native-script', apply_filters($hook, 'native-script', []));
+            $this->assertSame('native-script', apply_filters($hook, 'native-script', ['ID'=>0]));
+            $script = apply_filters($hook, 'native-script', ['ID'=>$id]);
+            $this->assertStringContainsString('wtdOrders.preview()', $script);
+            $this->assertStringNotContainsString('native-script', $script);
+        }
+    }
+
     public function test_quantity_change_uses_order_time_tiers_and_rejects_foreign_cart_ids(): void
     {
         $this->assertTrue(function_exists('wtd_order_quote'));

@@ -37,6 +37,46 @@ final class WelcartIntegrationTest extends TestCase
         $this->assertSame('10000', wtd_subtotal($registered));
     }
 
+    public function test_order_tax_delegates_to_native_apis_and_restores_shop_context(): void
+    {
+        global $usces;
+        $before = $usces->options;
+        $session = $_SESSION;
+        $singleton = get_object_vars(Welcart_Tax::get_instance());
+        $calls = [];
+        $observe = static function ($tax) use (&$calls) { $calls[] = current_filter(); return $tax; };
+        add_filter('usces_filter_getTax', $observe);
+        add_filter('usces_filter_internal_tax', $observe);
+        $condition = ['tax_mode'=>'exclude','tax_target'=>'products','tax_rate'=>10,'tax_method'=>'cutting','tax_display'=>'activate','applicable_taxrate'=>'standard','point_coverage'=>1];
+        try {
+            $this->assertEquals(950, wtd_native_tax(9500, 10, $condition));
+            $condition['tax_mode'] = 'include';
+            $this->assertEquals(863, wtd_native_tax(9500, 10, $condition));
+            $condition['applicable_taxrate'] = 'reduced';
+            $this->assertEquals(281, wtd_native_tax(3800, 8, $condition));
+            $this->assertSame(['usces_filter_getTax','usces_filter_internal_tax','usces_filter_getTax'], $calls);
+        } finally {
+            remove_filter('usces_filter_getTax', $observe);
+            remove_filter('usces_filter_internal_tax', $observe);
+        }
+        $this->assertSame($before, $usces->options);
+        $this->assertSame($session, $_SESSION);
+        $this->assertSame($singleton, get_object_vars(Welcart_Tax::get_instance()));
+        $fail = static function () { throw new RuntimeException('native-tax-failure'); };
+        add_filter('usces_filter_getTax', $fail);
+        try {
+            wtd_native_tax(3800, 8, $condition);
+            $this->fail('Native failures must propagate.');
+        } catch (RuntimeException $error) {
+            $this->assertSame('native-tax-failure', $error->getMessage());
+        } finally {
+            remove_filter('usces_filter_getTax', $fail);
+        }
+        $this->assertSame($before, $usces->options);
+        $this->assertSame($session, $_SESSION);
+        $this->assertSame($singleton, get_object_vars(Welcart_Tax::get_instance()));
+    }
+
     public function test_discount_is_registered_on_the_native_welcart_path(): void
     {
         $this->assertTrue(function_exists('wtd_discount_filter'), 'Plugin discount callback must be loaded by WordPress.');
@@ -120,5 +160,104 @@ final class WelcartIntegrationTest extends TestCase
         $this->assertSame($internal, $result['internal_tax']);
         $this->assertSame($total, $result['total']);
         $this->assertSame($internal, wtd_money_string(wtd_money_cents($result['internal_tax_parts']['standard']) + wtd_money_cents($result['internal_tax_parts']['reduced'])));
+    }
+
+    public static function taxEdgeCases(): array
+    {
+        $standard_settings = ['schema_version'=>1, 'target'=>['mode'=>'all'], 'tiers'=>[['threshold'=>10000,'type'=>'fixed','value'=>500,'enabled'=>true]]];
+        $rounding_settings = ['schema_version'=>1, 'target'=>['mode'=>'all'], 'tiers'=>[['threshold'=>10000,'type'=>'fixed','value'=>499,'enabled'=>true]]];
+        $standard_condition = ['tax_mode'=>'exclude','tax_target'=>'products','tax_rate'=>10,'tax_rate_reduced'=>8,'tax_display'=>'activate','applicable_taxrate'=>'standard','point_coverage'=>1];
+        $standard_fees = ['shipping_charge'=>'0','cod_fee'=>'0','usedpoint'=>0];
+
+        return [
+            'cutting keeps registered subtotal and discount' => [
+                'lines' => [['price'=>'10504','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $rounding_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10504','discount'=>'499','tax'=>'1000.00','internal_tax'=>'0.00','total'=>'11005.00'],
+            ],
+            'bring keeps registered subtotal and discount' => [
+                'lines' => [['price'=>'10504','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $rounding_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'bring']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10504','discount'=>'499','tax'=>'1001.00','internal_tax'=>'0.00','total'=>'11006.00'],
+            ],
+            'rounding keeps registered subtotal and discount' => [
+                'lines' => [['price'=>'10504','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $rounding_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'rounding']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10504','discount'=>'499','tax'=>'1001.00','internal_tax'=>'0.00','total'=>'11006.00'],
+            ],
+            'tax display off produces no tax' => [
+                'lines' => [['price'=>'10000','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $standard_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting','tax_display'=>'deactivate']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10000','discount'=>'500','tax'=>'0.00','internal_tax'=>'0.00','total'=>'9500.00'],
+            ],
+            'zero tax rate produces no tax' => [
+                'lines' => [['price'=>'10000','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $standard_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting','tax_rate'=>0]),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10000','discount'=>'500','tax'=>'0.00','internal_tax'=>'0.00','total'=>'9500.00'],
+            ],
+            'all target includes shipping and fee in tax base' => [
+                'lines' => [['price'=>'10000','quantity'=>'1','taxrate'=>'standard']],
+                'settings' => $standard_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting','tax_target'=>'all']),
+                'fees' => ['shipping_charge'=>'100','cod_fee'=>'50','usedpoint'=>0],
+                'expected' => ['subtotal'=>'10000','discount'=>'500','tax'=>'965.00','internal_tax'=>'0.00','total'=>'10615.00'],
+            ],
+            'reduced-only lines allocate discount and tax to reduced rate' => [
+                'lines' => [['price'=>'10000','quantity'=>'1','taxrate'=>'reduced']],
+                'settings' => $standard_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting','applicable_taxrate'=>'reduced']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'10000','discount'=>'500','tax'=>'760.00','internal_tax'=>'0.00','total'=>'10260.00'],
+            ],
+            'empty lines keep subtotal discount and tax at zero' => [
+                'lines' => [],
+                'settings' => $standard_settings,
+                'condition' => array_replace($standard_condition, ['tax_method'=>'cutting']),
+                'fees' => $standard_fees,
+                'expected' => ['subtotal'=>'0','discount'=>'0','tax'=>'0.00','internal_tax'=>'0.00','total'=>'0.00'],
+            ],
+        ];
+    }
+
+    /** @dataProvider taxEdgeCases */
+    public function test_order_amounts_cover_saved_tax_edges(array $lines, array $settings, array $condition, array $fees, array $expected): void
+    {
+        $result = wtd_order_amounts($lines, $settings, $condition, $fees);
+        $this->assertSame($expected['subtotal'], $result['subtotal']);
+        $this->assertSame($expected['discount'], $result['discount']);
+        $this->assertSame($expected['tax'], $result['tax']);
+        $this->assertSame($expected['internal_tax'], $result['internal_tax']);
+        $this->assertSame($expected['total'], $result['total']);
+        $this->assertSame($expected['internal_tax'], wtd_money_string(wtd_money_cents($result['internal_tax_parts']['standard']) + wtd_money_cents($result['internal_tax_parts']['reduced'])));
+    }
+
+    public function test_order_time_tax_condition_wins_over_current_shop_options(): void
+    {
+        global $usces;
+        $before = $usces->options;
+        $current = array_replace($before, ['tax_mode'=>'include','tax_target'=>'all','tax_rate'=>8,'tax_method'=>'bring','tax_display'=>'deactivate','applicable_taxrate'=>'standard']);
+        $usces->options = $current;
+        $settings = ['schema_version'=>1, 'target'=>['mode'=>'all'], 'tiers'=>[['threshold'=>10000,'type'=>'fixed','value'=>500,'enabled'=>true]]];
+        $condition = ['tax_mode'=>'exclude','tax_target'=>'products','tax_rate'=>10,'tax_rate_reduced'=>8,'tax_method'=>'cutting','tax_display'=>'activate','applicable_taxrate'=>'standard','point_coverage'=>1];
+        try {
+            $result = wtd_order_amounts([['price'=>'10000','quantity'=>'1','taxrate'=>'standard']], $settings, $condition, ['shipping_charge'=>'0','cod_fee'=>'0','usedpoint'=>0]);
+            $this->assertSame('10000', $result['subtotal']);
+            $this->assertSame('500', $result['discount']);
+            $this->assertSame('950.00', $result['tax']);
+            $this->assertSame('10450.00', $result['total']);
+            $this->assertSame($current, $usces->options);
+        } finally {
+            $usces->options = $before;
+        }
     }
 }

@@ -12,12 +12,13 @@ document.addEventListener(
 		if ( ! panel) {
 			return;
 		}
-		const form   = panel.closest( 'form' );
-		const status = document.getElementById( 'wtd-preview-status' );
-		const token  = form.elements.namedItem( 'wtd_preview' );
-		const button = document.getElementById( 'wtd-preview-button' );
-		let revision = 0;
-		let adding   = false;
+		const form         = panel.closest( 'form' );
+		const status       = document.getElementById( 'wtd-preview-status' );
+		const token        = form.elements.namedItem( 'wtd_preview' );
+		const button       = document.getElementById( 'wtd-preview-button' );
+		const nativeButton = document.getElementById( 'recalc' );
+		let revision       = 0;
+		let adding         = false;
 		function dirty() {
 			revision++;
 			token.value        = '';
@@ -55,10 +56,16 @@ document.addEventListener(
 			changeTax.closest( 'span' ).textContent = wtdOrders.historicalTax;
 		}
 		async function preview() {
+			if (button.disabled || adding) {
+				return;
+			}
 			const current   = ++revision;
 			token.value     = '';
 			button.disabled = true;
-			const data      = new FormData( form );
+			if (nativeButton) {
+				nativeButton.disabled = true;
+			}
+			const data = new FormData( form );
 			data.set( 'action', 'wtd_preview_order' );
 			try {
 				const response = await fetch( wtdOrders.url, { method: 'POST', body: data, credentials: 'same-origin' } );
@@ -118,8 +125,13 @@ document.addEventListener(
 				}
 			} finally {
 				button.disabled = false;
+				if (nativeButton) {
+					nativeButton.disabled = false;
+				}
 			}
 		}
+		wtdOrders.preview = preview;
+		button.addEventListener( 'click', preview );
 		document.addEventListener(
 			'click',
 			function (event) {
@@ -138,11 +150,6 @@ document.addEventListener(
 					remove.closest( 'tr' ).remove();
 					dirty();
 					return;
-				}
-				if (event.target.closest( '#recalc, #wtd-preview-button' )) {
-					event.preventDefault();
-					event.stopImmediatePropagation();
-					preview();
 				}
 			},
 			true

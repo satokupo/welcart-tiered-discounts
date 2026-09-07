@@ -20,6 +20,8 @@ function wtd_order_hooks() {
 	add_action( 'wp_ajax_order_item_ajax', 'wtd_guard_native_preview', 5 );
 	add_action( 'wp_ajax_order_item2cart_ajax', 'wtd_stage_order_item', 5 );
 	add_filter( 'usces_filter_ordereditform_carttable', 'wtd_order_panel', 20, 2 );
+	add_filter( 'order_edit_form_recalculation', 'wtd_order_recalculation_script', 20, 2 );
+	add_filter( 'order_edit_form_recalculation_reduced', 'wtd_order_recalculation_script', 20, 2 );
 	add_action( 'usces_pre_update_orderdata', 'wtd_before_edit_order', 20 );
 	add_action( 'usces_after_update_orderdata', 'wtd_after_edit_order', 100, 2 );
 	add_action( 'admin_init', 'wtd_preflight_edit_order', 20 );
@@ -359,6 +361,21 @@ function wtd_ajax_preview_order() {
 		wtd_log_error( $error->getMessage(), 'order_preview', $order_id );
 		wp_send_json_error( array( 'message' => __( '再計算できません。入力値をご確認ください。他の画面で保存された場合は、この画面を再読み込みしてください。', 'welcart-tiered-discounts' ) ), 409 );
 	}
+}
+
+/**
+ * Connect the native button to the same read-only preview as the discount panel.
+ *
+ * @param string $script Native recalculation script.
+ * @param array  $data Native order data.
+ * @return string Script for this order.
+ */
+function wtd_order_recalculation_script( $script, $data ) {
+	global $usces;
+	if ( empty( $data['ID'] ) || null === $usces->get_order_meta_value( 'wtd_discount_snapshot', $data['ID'] ) ) {
+		return $script;
+	}
+	return 'if (window.wtdOrders && typeof wtdOrders.preview === "function") { wtdOrders.preview(); } return false;';
 }
 
 /** Stop native recalculation AJAX from changing tax data before a confirmed save. */

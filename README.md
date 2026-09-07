@@ -36,9 +36,12 @@ WordPress、Welcart、テーマ、DBの実体はDocker volumeで管理し、`plu
 ./scripts/dev.sh recommended wp plugin activate welcart-tiered-discounts
 ./scripts/dev.sh recommended quality
 ./scripts/dev.sh recommended integration
+node tests/OrderRecalculationScriptTest.js
 ```
 
 `quality` はComposer検査・PHP lint・PHPCS/WPCS・実単体テストを実行します。`integration` は割り当てたローカルWordPressにダミー商品・会員・受注を作成するため、本番環境では実行しないでください。試験用MUプラグインは、この入口でだけ有効にします。実HTTP試験と管理画面の操作を並行する場合は、同じ設定や受注を同時に変更しないでください。
+
+Node.js の追加依存なしのチェックは、受注再計算の連打・古い応答の破棄・入力変更後の保存保護を確認します。PHPの `quality` とは別に実行します。
 
 Plugin Check は `./scripts/dev.sh recommended wp plugin check welcart-tiered-discounts` で実行します。終了コードに加えて出力中の指摘も確認してください。現在の `Tested up to: 7.0` は実測範囲です。最新WordPressを要求するディレクトリ掲載用チェックには未解消の指摘があり、7.1対応を表明していません。
 
