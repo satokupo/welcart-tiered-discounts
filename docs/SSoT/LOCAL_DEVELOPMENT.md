@@ -154,7 +154,7 @@ PHP、Composer、PHP_CodeSniffer、WPCS、PHPUnit、WP-CLI はホストへグロ
 
 この起動は保存済みの WordPress と DB を使用し、初期化・データ削除を行わない。ブラウザ表示だけなら WP-CLI・品質ツールの常駐コンテナは不要である。
 
-`recommended` は `compose.yaml` の固定ポート 8080 を使用する。`dev.sh` の環境引数は `recommended`・`latest`・`minimum` であり、B〜E の選択には使わない。別 worktree から同じコマンドを実行しても独立環境にはならないため、[環境の再利用](#環境の再利用)に従って接続するコードと保存領域の割当を確認する。
+`recommended` の既定は A（8080）。B〜E では対象 worktree の Git 管理外 `docker/local.env` に `WTD_COMPOSE_PROJECT` と `WTD_PORT` を設定し、`RECOMMENDED_WP_URL` も割当 URL に合わせる。C の例は project `welcart-tiered-discounts-c`、port `8280`。この値を省略すると既定 A を操作するため、[環境の再利用](#環境の再利用)に従って割当と mount 元を先に確認する。dev.sh の第一引数は引き続き `recommended` とする。
 
 ### 接続できない場合
 
@@ -261,7 +261,21 @@ WordPress の debug log、PHP error log、container log はローカルで読め
 ./scripts/dev.sh recommended wp theme list
 ```
 
-`quality` は `composer validate --strict`、lock からの依存導入、platform requirements、PHP lint、WPCS、PHPUnit runner の設定読込みをまとめて確認します。Plugin Check は WordPress 上の WP-CLI コマンドとして別に入口を確認します。環境準備では機能テストや割引処理を追加しません。
+`quality` は `composer validate --strict`、lock からの依存導入、platform requirements、PHP lint、WPCS、純粋処理の PHPUnit 実テストを実行する。`--list-tests` だけの終了を機能試験成功と扱わない。Plugin Check は WordPress 上で `./scripts/dev.sh recommended wp plugin check welcart-tiered-discounts` を実行し、出力内の ERROR も確認する。
+
+### 実 WordPress の機能試験
+
+割当済みのローカル環境だけで次を実行する。`integration` は `compose.integration.yaml` を追加し、Web と quality へ同じ plugin・試験用 MU plugin を接続して `WTD_TEST_MODE=1` を設定する。ダミーデータ生成、ローカルメール捕捉、故障注入はこの試験構成に限る。
+
+```sh
+./scripts/dev.sh recommended integration
+# 対象を絞る例
+./scripts/dev.sh recommended integration --filter OrderHttpTest
+```
+
+同じ Compose 環境の起動・再作成は一人の実行者に集約する。試験中に通常の `up`・`wp`・`versions` で Web を再作成すると override が外れる。既存コンテナで対象テストだけ実行する場合は、確認済みの quality コンテナへ `docker exec -w /workspace <quality名> composer phpunit -- --group integration --filter <対象>` を使用する。
+
+試験終了後は通常の `./scripts/dev.sh recommended up wordpress quality` で試験 override を外し、`WTD_TEST_MODE` と試験 MU mount が無いことを inspect で確認する。ボリュームは保持する。テスト・MU fixture・Docker 設定をプラグイン配布物に含めない。
 
 ## 検証記録
 
@@ -274,4 +288,4 @@ WordPress の debug log、PHP error log、container log はローカルで読め
 - `PASS` / `FAIL` / `BLOCKED` と理由
 - 実測時刻、関連ログ、スクリーンショットまたは画面記録への参照
 
-`recommended` の必須項目がすべて成立し、`latest` と `minimum` の試行結果、品質入口、Git 非汚染、文書整合を記録できた時点で、環境準備完了を判定します。課題実装の作業時間はその後に計測します。
+`recommended` の必須項目がすべて成立し、`latest` と `minimum` の試行結果、品質入口、Git 非汚染、文書整合を記録できた時点で、環境準備完了を判定します。割引機能の検証は別途実装・検証レポートへ記録する。作業時間の計測・算入で MVP の達成を判定しない。
