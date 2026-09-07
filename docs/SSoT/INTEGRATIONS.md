@@ -21,12 +21,19 @@
 
 管理編集は `admin_init` で権限と二つの nonce を確認し、native 受注行を `SELECT ... FOR UPDATE` でロックする。注文、明細、税・option メタを含む fingerprint とサーバー署名付きプレビューを再検証する。native API による変更と履歴を同一 transaction に置き、SQL エラーまたは読み戻し不一致で DB と session を復元する。HTTP エラーを返せるよう編集処理中の出力を保留する。管理追加・削除も未保存の画面段階では DB を変更しない。
 
+管理編集の再計算ボタンは、標準税率・軽減税率の script filter から同じ署名付きプレビューへ接続する。税率別の対象額、割引配分、ポイント上限は注文時条件で組み立て、税額と丸めは `getTax` / `usces_internal_tax` へ委ねる。呼出し中だけ注文時条件を option に適用し、例外時も復元する。標準内税は `usces_internal_tax`、外税と混合内税は税率別の対象額を `getTax` に渡し、対象版の計算順序を保つ。
+
+受注全体の `usces_order_recalculation` / `_reduced` は製品から呼ばない。軽減税率版は割引総額だけでは税率別割引が同期せず、保存済み cart ID のない追加明細の税区分も取得できない。`get_order_tax` のカート再構築も同じ保存済みメタ／SKU参照を伴うため、編集プレビューでは税率別の対象額を渡す。採否の根拠は [判断記録](decisions/2026/09/2026-09-08_受注編集は税計算と再計算入口だけnativeへ委ねる.md) を参照する。
+
 以下の採用一覧のソース位置は Welcart ヘッダー版 2.12.1（内部版 2.12.1.2608181）を基準とする。プラグイン側の行番号は一覧作成時の位置で、関数名を探索入口とする。静的な採用一覧と全経路の実行保証を区別する。実測証拠は実装・検証レポートを参照する。
 
 ## Welcart API、hook、filter
 
 | API / hook | プラグインの使用箇所 | Welcart 2.12.1 の実ソース | 用途と採用理由 |
 |---|---|---|---|
+| `order_edit_form_recalculation`, `order_edit_form_recalculation_reduced` filter | `orders.php`: `wtd_order_recalculation_script($script, $data)`、priority 20 / 2引数 | [`includes/order_edit_form.php:928,993`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/includes/order_edit_form.php) | snapshot のある既存受注だけ、native 再計算から署名付きプレビューへ接続する。新規・snapshot なしは元 script を返す。click の捕捉順に依存しないため採用。 |
+| `$usces->getTax($total, $materials = array())` | `welcart.php`: `wtd_native_tax` | [`classes/usceshop.class.php:8430`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/usceshop.class.php) | 外税と混合内税の税率別対象額を、注文時の税率・丸めで計算する。空 materials でカートの再読込みを避け、native 税額 filter も通す。 |
+| `usces_internal_tax($materials, 'return')` | `welcart.php`: `wtd_native_tax` | [`functions/template_func.php:210`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/functions/template_func.php) | 標準内税の計算順序と丸めを native に委ねる。対象額は割引・送料等・ポイント適用後なので、materials の追加控除は0にする。 |
 | `usc_e_shop` / global `$usces` | `plugin/welcart-tiered-discounts.php:31-35`; 各 integration file の `global $usces` | クラス定義 [`classes/usceshop.class.php:7`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/usceshop.class.php)、生成 [`usc-e-shop.php:62-64`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/usc-e-shop.php) | Welcart がロード済みのときだけ連携を登録する依存関係の境界。公開されたメインオブジェクトを使い、Welcart 本体を改変しない。 |
 | `usces_order_discount` filter | `welcart.php:15`; callback は `discount, cart` を受ける | Tax 経路 [`classes/tax.class.php:368`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/tax.class.php)、通常合計経路 [`classes/usceshop.class.php:8318`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/usceshop.class.php) | Welcart が注文割引を確定する公開 filter。登録価格から算出した単一の割引を、税計算・合計計算の native 経路へ返すため採用。 |
 | `usces_filter_cart_table_footer` filter | `welcart.php:16` | [`templates/cart/cart.php:67`](https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/templates/cart/cart.php) | native カート表の footer を拡張し、現在の割引行を表示するため採用。 |
