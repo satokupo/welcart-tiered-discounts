@@ -47,6 +47,7 @@
 | `FUNCTIONAL_SPEC.md` | 各機能がどう動くか（入力・計算・例外） | 要件記入済み。連携・画面の実測事項は確認一覧へ分離 |
 | `DATA_MODEL.md` | どんな情報をどういう形で持つか | 設定構造記入済み。受注側の物理保存先は実測待ち |
 | `TECH_STACK_AND_OPERATIONS.md` | 何で作り、どこでどう動かすか | 作成済み |
+| `LOCAL_DEVELOPMENT.md` | ローカル開発の worktree・A〜E 環境・DB 更新の分離と統合 | 作成済み |
 | `INTEGRATIONS.md` | 連携契約、公式 API の用途・参照先、責務の境界 | 記入済み。公式リファレンスの事実と連携契約を記載 |
 | `OPEN_QUESTIONS.md` | ユーザー確認の結果と、実装前の実測・後続機能の未決事項 | 初回のユーザー確認 5 件を反映済み。技術確認・後続詳細は残存 |
 | `DECISIONS.md` | 決定の索引（実体は `decisions/YYYY/MM/`） | 運用中 |
@@ -79,6 +80,7 @@
 | 「これ作るんだっけ？」の判定 | `MVP_SCOPE.md` |
 | 機能を実装する | `ASSIGNMENT_REQUIREMENTS.md` → `MVP_SCOPE.md` → `FUNCTIONAL_SPEC.md` → `OPEN_QUESTIONS.md` →（データに触るなら）`DATA_MODEL.md` |
 | データ構造を変える | `DATA_MODEL.md` → `FUNCTIONAL_SPEC.md`（影響の確認） |
+| 並列開発・worktree の環境割当・DB 更新 | `LOCAL_DEVELOPMENT.md` → `TECH_STACK_AND_OPERATIONS.md` →（製品データを変えるなら）`DATA_MODEL.md` |
 | Welcart の連携経路を調べる・変更する | `FUNCTIONAL_SPEC.md` → `INTEGRATIONS.md` → `OPEN_QUESTIONS.md` → 対象版のソース |
 | 未決事項と後続作業を確認する | `OPEN_QUESTIONS.md` → `../work/MILESTONES.md` → `../work/INDEX.md` |
 | 環境構築・デプロイ | `ASSIGNMENT_REQUIREMENTS.md` → `TECH_STACK_AND_OPERATIONS.md` → `../ENVIRONMENT_VERIFICATION.md` |
@@ -94,6 +96,7 @@
 | 機能の振る舞い・画面・計算式・例外 | `FUNCTIONAL_SPEC.md` |
 | 情報の構造・項目・つながり・アクセス制御 | `DATA_MODEL.md` |
 | 技術スタック・認証・実行環境・鍵の管理方針 | `TECH_STACK_AND_OPERATIONS.md` |
+| ローカル開発のコード・環境・DB の分離と統合 | `LOCAL_DEVELOPMENT.md` |
 | 既存 API の用途、参照先、候補と採用、連携根拠 | `INTEGRATIONS.md` |
 | 仕様上の確認事項と解決先 | `OPEN_QUESTIONS.md` |
 | 後続機能の内容・優先順・未完了作業 | `../work/todo/`・`../work/MILESTONES.md` |

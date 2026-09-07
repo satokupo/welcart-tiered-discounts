@@ -44,4 +44,5 @@ Welcart に商品代金に応じた段階式の自動割引機能を追加する
 
 | 発火条件 | 1行概要 | path |
 |---|---|---|
+| ローカル開発環境の起動・割当、worktree・ブランチの分岐・統合、DB 更新を扱うとき | ローカル開発 SSoT の環境分離・再利用・DB 更新方針を確認する。 | `.agents/conditional-rules/local-development.md` |
 | 割引プラグインの設計・実装・レビュー・検証を行うとき | TDD、連携根拠、UI 確認、提出用の検証を揃える。 | `.agents/conditional-rules/plugin-development.md` |
