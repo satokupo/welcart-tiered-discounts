@@ -83,11 +83,15 @@ if ( ! class_exists( 'WtdTestHttp' ) ) {
 				$raw_body = curl_exec( $ch );
 				if ( false === $raw_body ) {
 					$error = curl_error( $ch );
-					curl_close( $ch );
+					if ( is_resource( $ch ) ) {
+						curl_close( $ch );
+					}
 					throw new RuntimeException( 'HTTP request failed: ' . $error );
 				}
 				$status = (int) curl_getinfo( $ch, CURLINFO_RESPONSE_CODE );
-				curl_close( $ch );
+				if ( is_resource( $ch ) ) {
+					curl_close( $ch );
+				}
 
 				if ( 300 <= $status && 400 > $status && null !== $location ) {
 					$url = $this->local_url( $location, $url );

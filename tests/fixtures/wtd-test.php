@@ -99,10 +99,11 @@ if ( 'snapshot' === $wtd_test_checkout_failure && 'POST' === ( $_SERVER['REQUEST
 	);
 }
 
-add_filter( 'pre_wp_mail', function ( $return, $attributes ) {
-    // Test-only capture lets tests inspect the same body Welcart sends, without delivery.
+add_filter( 'wp_mail', function ( $attributes ) {
+    // WP 5.6 lacks pre_wp_mail; capture before the local sendmail sink discards delivery.
     $messages = get_option( 'wtd_test_mail', array() );
     $messages[] = $attributes;
     update_option( 'wtd_test_mail', $messages, false );
-    return true;
-}, 1, 2 );
+    return $attributes;
+}, 1 );
+add_filter( 'pre_wp_mail', '__return_true', 1 );

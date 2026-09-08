@@ -95,7 +95,8 @@ final class OrderHookReplacementTest extends TestCase
             } finally {
                 restore_error_handler();
             }
-            $this->assertContains('Trying to access array offset on null', $warnings, 'The native saved-cart lookup cannot resolve a draft row.');
+            $nullOffset = PHP_VERSION_ID < 80000 ? 'Trying to access array offset on value of type null' : 'Trying to access array offset on null';
+            $this->assertContains($nullOffset, $warnings, 'The native saved-cart lookup cannot resolve a draft row.');
             $this->assertEquals(0, $draft['subtotal_reduced']);
             $this->assertNotEquals(874, $draft['tax']);
             $this->assertSame($before, wtd_order_record($order));

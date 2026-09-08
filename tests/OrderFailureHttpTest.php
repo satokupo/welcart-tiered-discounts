@@ -356,7 +356,9 @@ final class OrderFailureHttpTest extends TestCase {
 			[ $client, $fields ] = $request;
 			$reflection = new ReflectionObject( $client );
 			$cookie_property = $reflection->getProperty( 'cookie_jar' );
-			$cookie_property->setAccessible( true );
+			if ( PHP_VERSION_ID < 80100 ) {
+				$cookie_property->setAccessible( true );
+			}
 			$port = $client->port();
 			$handle = curl_init( $this->local_url( $this->edit_post_path( $this->order_id() ), $port ) );
 			$this->assertNotFalse( $handle );
@@ -400,7 +402,9 @@ final class OrderFailureHttpTest extends TestCase {
 				'url' => (string) curl_getinfo( $handle, CURLINFO_EFFECTIVE_URL ),
 			);
 			curl_multi_remove_handle( $multi, $handle );
-			curl_close( $handle );
+			if ( is_resource( $handle ) ) {
+				curl_close( $handle );
+			}
 		}
 		curl_multi_close( $multi );
 		ksort( $responses );
