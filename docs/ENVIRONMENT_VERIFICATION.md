@@ -193,3 +193,50 @@ Docker Hub の匿名 pull rate limit が発生したため、同一の固定タ�
 | Plugin Check 2.1.0 | 実行 exit 0、出力内の ERROR は `outdated_tested_upto_header` 1 件。`Tested up to: 7.0` を実測範囲に留めるため、WordPress.org 掲載審査の合格とは扱わない |
 
 minimum の native 保存成功は、HTTP ブラウザ・メール本文や主環境の全試験成功を示すものではない。latest の DB 接続失敗を製品互換性の成功に読み替えない。操作・終了コード・金額と Red/Green の詳細、画面証拠は [実装・検証レポート](visdoc/briefing/0907_Welcart割引実装/実装・検証レポート.md) に集約する。作業時間を計測・算入して MVP 完成を判定しない。
+
+## 2026-09-08 dev版の未実施試験を補完
+
+対象はdev `5b35fd08cb979b0b48a6d740ed3be7f264625686` のプラグインを含む調整版参考ZIP。プライマリのdevで実行し、新しいworktreeとサブエージェントは使用していない。main `b0c0e1a1462d86d6cb1d25ce9f5452c748320958`、プラグイン本体、既存の正式提出用・参考用ZIPは変更していない。
+
+### 環境と新規導入
+
+| 環境 | WordPress / Welcart | PHP / MySQL | テーマ | 結果 |
+|---|---|---|---|---|
+| latest（8081） | 7.1 / 2.12.1 | 8.5.9 / 26.7.0 | Twenty Twenty-Five 1.5 | 新規WordPressへZIPを導入・有効化、exit 0 |
+| minimum（8082） | 5.6.19 / 2.12.1 | 7.4.33 / 5.5.62 | Twenty Twenty-One 1.1 | 新規WordPressへZIPを導入・有効化、exit 0 |
+
+既存DBの認証不一致とDockerの自動アドレス割当枯渇を避けるため、未使用を確認した `10.254.80.0/24`・`10.254.81.0/24` と、末尾が `-dev-zip-20260908` の新しい専用volumeを使用した。旧volume・networkを削除せず、A〜EのWeb/DB構成は変更していない。実行用Composeはセッションの一時ディレクトリに置き、リポジトリの標準Composeは変更していない。
+
+プラグインのbind mountを外し、`wp plugin install /artifacts/welcart-tiered-discounts-1.0.0-dev-adjusted-reference-5b35fd0.zip --activate` で両環境へ導入した（各exit 0）。導入後、全10ファイルの実バイト列がZIPと一致することをPythonで検査した（各10/10、exit 0）。ZIPのSHA-256は `ea953c29d3d972838d8c5bdb714c8ff02068fe8f3ee66b514e2f7bab7e8cbb44`。
+
+### 実行結果
+
+| 検査・操作 | 結果 |
+|---|---|
+| latest: `docker exec -w /workspace welcart-tiered-discounts-latest-wordpress-1 php vendor/bin/phpunit --group integration` | exit 0、68 tests / 1,042 assertions、14.989秒 |
+| minimum: 上記コンテナ名を `welcart-tiered-discounts-minimum-wordpress-1` へ変更 | exit 0、68 tests / 1,042 assertions、42.144秒 |
+| `./scripts/dev.sh recommended quality` | exit 0。Composer検査・PHP lint・PHPCS/WPCS・単体68 tests / 96 assertions |
+| ブラウザー実操作（両環境） | 商品→カート→購入者情報→配送・ローカル振込→内容確認→注文完了。商品10,000円、割引500円、内消費税863円、請求9,500円 |
+| 最新環境の管理画面 | ステップ割引設定を保存し、保存成功表示と保存後の値を確認 |
+| ブラウザー注文のDB・メール本文読戻し | 両環境とも専用注文ID 1032。受注・snapshotの9,500円、捕捉メールの割引500円・内税863円・合計9,500円が一致（`wp eval-file .../verify-ui.php`、各exit 0） |
+| 通常構成のPlugin Check 2.1.0 | `docker exec welcart-tiered-discounts-latest-cli-1 wp plugin check welcart-tiered-discounts` はexit 0。ただし出力に `outdated_tested_upto_header` ERROR 1件 |
+
+連携試験には設定入力、HTTP購入とメール本文、税・ポイント、受注編集・追加削除・保存保護、SQL失敗時のロールバック、同時保存、native関数への置換比較を含む。画面はCodexのブラウザー実操作・アクセシビリティツリーとスクリーンショットで確認した。メールはローカルで捕捉し、実配送と外部決済の実取引は行っていない。
+
+### 初回失敗とテスト補助コードの修正
+
+- latest初回は68 tests / 1,035 assertions、failure 1・risky 3、exit 1。新規環境の `WP_DEBUG_DISPLAY=true` により、意図したSQL失敗の出力が409応答を妨げていたため、標準開発構成と同じ `WP_DEBUG_DISPLAY=false`・`WP_DEBUG_LOG=true` に設定した。PHP 8.5で非推奨となる無効な後始末呼出しは、cURLがresourceのときだけcloseし、Reflectionのアクセス切替はPHP 8.1未満だけに限定した。
+- minimum初回は68 tests / 929 assertions、failure 5、exit 1。WordPress 5.6には `pre_wp_mail` がないため、捕捉を `wp_mail` フィルターへ移した。5.7以降の送信抑止は維持し、5.6では既存のローカルsendmail sinkが実配送を破棄する。native比較テストのnull offset警告文はPHP 7.4と8以降それぞれの実メッセージで照合する。
+- 変更は `tests/OrderFailureHttpTest.php`、`tests/OrderHookReplacementTest.php`、`tests/fixtures/HttpClient.php`、`tests/fixtures/wtd-test.php` のみ。金額・DB保存・ロールバックの期待値を緩めず、修正後に両環境の全連携試験を再実行して上表の成功を確認した。
+
+検証後は両環境とも試験用MUプラグインのmountを外し、`WTD_TEST_MODE=0` の通常構成へ戻した（各exit 0、mountと環境変数の読戻し済み）。新しい検証用volumeは保持している。
+
+`Tested up to: 7.0` はZIP同一性を維持するため変更していない。今回の7.1機能試験成功と、WordPress.org掲載用Plugin Checkの未解消指摘は別々に扱う。この追試をmain版の受入れや時間制限内実装の判定へ読み替えない。
+
+生ログ、終了コード・所要時間のJSON、実行用Compose、導入ファイル検証は `temp/01a07d90-54ba-7562-8926-f3290d1ab20f_20260908-102101_dev-remaining-tests/` に保存した。
+
+### 追試後の検証済み版表記の更新
+
+ユーザーの指示により、devの `plugin/readme.txt` の `Tested up to` を7.0から7.1へ更新した。READMEには、mainが主たる提出用、devが時間超過後に調整した参考版であることを明記した。mainの表記・コード、既存ZIPは変更していない。
+
+最新環境の導入済み `readme.txt` だけを更新し、通常構成で `docker exec welcart-tiered-discounts-latest-cli-1 wp plugin check welcart-tiered-discounts` を再実行した。終了コード0、`Success: Checks complete. No errors found.` を確認し、上記の `outdated_tested_upto_header` はdevで解消した。ログは同じ一時ディレクトリの `latest-plugin-check-readme71.log`。先のZIP全ファイル一致は、この表記更新前の検証結果である。
