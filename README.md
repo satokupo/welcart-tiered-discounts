@@ -1,5 +1,7 @@
 # Welcart Tiered Discounts
 
+このブランチ（main）は、主たる提出用です。制限時間を超えてから調整を加えた参考版は [devブランチ](https://github.com/satokupo/welcart-tiered-discounts/tree/dev) にあります。
+
 Welcart に、登録販売価格と数量の小計に応じた段階式割引を追加する独立 WordPress プラグインです。たとえば「10,000円以上で500円引き」「30,000円以上で2,000円引き」を設定できます。条件を満たす有効な段のうち、しきい値が最も高い1段を適用します。
 
 ## 導入と確認
