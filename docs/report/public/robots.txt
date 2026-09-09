@@ -1,0 +1,7 @@
+# Search crawlers must read X-Robots-Tag to honor noindex.
+User-agent: Googlebot
+User-agent: bingbot
+Allow: /
+
+User-agent: *
+Disallow: /

@@ -1,0 +1,15 @@
+Composer could not detect the root package (satokupo/welcart-tiered-discounts) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+PHPUnit 9.6.36 by Sebastian Bergmann and contributors.
+
+F                                                                   1 / 1 (100%)
+
+Time: 00:00.006, Memory: 54.50 MB
+
+There was 1 failure:
+
+1) OrderPreviewTest::test_a_missing_original_amount_cannot_be_treated_as_a_valid_snapshot
+Failed asserting that exception of type "InvalidArgumentException" is thrown.
+
+FAILURES!
+Tests: 1, Assertions: 1, Failures: 1.
+Script @php ./vendor/bin/phpunit --configuration phpunit.xml.dist handling the phpunit event returned with error code 1

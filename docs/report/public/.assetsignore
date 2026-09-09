@@ -1,0 +1,5 @@
+# Only the two submitted recordings are published.
+media/*.mp4
+!media/buy3.mp4
+!media/edit2.mp4
+**/.DS_Store
