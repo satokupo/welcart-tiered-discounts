@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Welcart自動段階割引プラグインの提出資料。プラグイン、設計メモ、AI活用レポート、動作確認の記録。">
   <title>Welcart 自動段階割引 | 開発レポート</title>
-  <link rel="stylesheet" href="style.css?v=20260909-7">
+  <link rel="stylesheet" href="style.css?v=20260909-17">
   <script src="app.js?v=20260909-7" defer></script>
 </head>
 <body>
@@ -13,7 +13,7 @@
   <div class="page">
     <header class="hero">
       <div>
-        <h1 id="page-top" tabindex="-1">Welcart 自動段階割引<br>開発レポート</h1>
+        <h1 id="page-top" tabindex="-1"><a href="./" title="ホームへ戻る">Welcart 自動段階割引<br>開発レポート</a></h1>
         <p>実装内容と、設計・検証・AI活用の記録。</p>
       </div>
       <img src="assets/tableware.png" alt="" width="480" height="360" fetchpriority="high">
@@ -26,7 +26,8 @@
     </nav>
     <main id="report" tabindex="-1">
       <section id="plugin" class="report-panel" aria-labelledby="tab-plugin">
-        <section class="submission-overview prose" aria-labelledby="overview-提出物について"><h2 id="overview-提出物について">提出物について</h2>
+        <section class="submission-overview prose" aria-labelledby="overview-プラグイン"><h2 id="overview-プラグイン">プラグイン</h2>
+<h3 id="overview-提出物について">提出物について</h3>
 <p>本課題では、<strong>割引額の計算を共通化し、Welcartの既存フックを通じてカート、購入確認、受注保存へ接続する</strong>方針で実装しました。
 Welcart本体とテーマは変更していません。
 登録販売価格と数量の商品小計を基準に、条件を満たす最も高いしきい値の1段を適用します。</p>
@@ -264,6 +265,40 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 <a
 href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/orders.php#L149" target="_blank" rel="noopener noreferrer">該当処理</a>を参照できます。</p>
 <h4
+id="design-課題条件の解釈と報告書作成時の追加確認">課題条件の解釈と、報告書作成時の追加確認</h4>
+<p>この提出資料を作成している段階で浮かんだ疑問があり、ここに専用セクションを追加します。</p>
+<p>実装時、私は「Welcartの既存フック／フィルタのみで実現すること」を、割引処理をWelcartへ組み込む際に、既存の拡張口を利用するという意味で理解していました。
+管理画面や設定保存にはWordPressの標準機能も併用できると考えており、WelcartとWordPressのフックをどちらか一方に限定する条件とは捉えていませんでした。</p>
+<p>この報告書を作成する段階で、この条件の文章である「Welcartの既存フック／フィルタのみで実現すること」を再確認した際、WordPress固有のフックの利用まで制限する意図があった可能性を考え、Codexに追加調査を依頼しました。
+Welcart
+2.12.1のソースを確認した結果、WordPress固有のフックを登録せずに、次の方法で設定画面と保存処理を実装する経路が見つかりました。</p>
+<table>
+<thead>
+<tr>
+<th>対象</th>
+<th>Welcartの既存フックを使う別案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="対象">設定画面</td>
+<td data-label="Welcartの既存フックを使う別案"><code>usces_action_admin_system_extentions</code>を使い、Welcartのシステム設定画面に割引設定フォームを追加する。WordPressの<code>admin_menu</code>で別の設定ページを作る必要はない</td>
+</tr>
+<tr>
+<td data-label="対象">設定保存</td>
+<td data-label="Welcartの既存フックを使う別案">同じ画面へフォームを通常送信し、同じWelcartフックの処理内で権限確認、nonce検証、入力検証、保存を行う。<code>admin_init</code>や独自AJAXアクションの登録を使わずに構成できる</td>
+</tr>
+</tbody>
+</table>
+<p>調査の根拠は、対象版の<a
+href="https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/usceshop.class.php" target="_blank" rel="noopener noreferrer">管理画面の制御処理</a>と<a
+href="https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/includes/admin_system.php" target="_blank" rel="noopener noreferrer">設定画面の拡張口</a>です。
+割引計算から購入確認、受注保存への接続にも既存のWelcartフックがあるため、課題の必須機能はこの別案で構成できると判断しました。
+この場合も、nonce検証や設定保存にはWordPressの標準関数を利用します。
+確認したのはソース上の実装経路であり、別案への実装変更や実機試験は行っていません。</p>
+<p>もし出題意図が、WordPress固有のフックも使わずにWelcartの既存フックだけへ接続するという限定だったのであれば、私の事前確認が不足していました。
+実装時の解釈と、報告書作成時に確認した別案を区別して、ここに記録します。</p>
+<h4
 id="design-aiの自己レビューで検討した候補と比較">AIの自己レビューで検討した候補と比較</h4>
 <p>以下は、AIが技術的な採否を整理したものです。私が説明を受けて判断した経緯は、<a
 href="#ai">AI活用レポートの「AIの提案に対して人間が判断したこと」</a>に記載しています。</p>
@@ -467,49 +502,14 @@ id="ai-複数の変更が重なるエッジケースへの対応は見送った"
 id="ai-実装検証レポートの分かりやすさを改善する">実装・検証レポートの分かりやすさを改善する</h4>
 <p>実装・検証レポートはビジュアルドキュメントとして作成していますが、人間が内容を把握しやすくする点では、まだ改善の余地があると認識しています。実務を進める中で、特に確認すべきポイントが明確になってくると考えているため、それに合わせて自動作成される報告書も改善していく予定です。</p>
 </section>
-      <section id="recording" class="report-panel prose" aria-labelledby="tab-recording"><h2 id="recording-動作確認の記録">動作確認の記録</h2>
-<p>カートでの割引適用と注文後の編集を2本の動画にまとめています。
-購入確認画面と確定後の受注データの金額は、開発時の実HTTP購入テストでも照合しました。</p>
-<h3
-id="recording-必須要件の3箇所で確認したこと">必須要件の3箇所で確認したこと</h3>
-<table>
-<thead>
-<tr>
-<th>確認箇所</th>
-<th>確認した金額と動作</th>
-<th>確認記録</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="確認箇所">カート画面</td>
-<td data-label="確認した金額と動作">10,000円以上で500円引き、30,000円以上で2,000円引きに切り替わる</td>
-<td data-label="確認記録">下の「1. 注文」の動画</td>
-</tr>
-<tr>
-<td data-label="確認箇所">購入確認画面</td>
-<td data-label="確認した金額と動作">商品10,000円、割引500円、請求9,500円（内税863円）</td>
-<td data-label="確認記録"><a href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L24" target="_blank" rel="noopener noreferrer">確認画面のHTTPテスト</a></td>
-</tr>
-<tr>
-<td data-label="確認箇所">確定後の受注データ</td>
-<td data-label="確認した金額と動作">その確認画面から注文を確定し、商品10,000円、割引500円、請求9,500円の保存値と注文時の記録が一致する</td>
-<td data-label="確認記録"><a href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L505" target="_blank" rel="noopener noreferrer">同じ注文の保存値の照合</a></td>
-</tr>
-</tbody>
-</table>
-<p>購入確認と受注保存の数値は、税込10%、送料、手数料、利用ポイントがすべて0の条件で確認した例です。
-カート動画では複数の商品と数量を使って、しきい値をまたぐと割引が切り替わる様子を確認できます。</p>
-<p>上記のHTTPテストを含む提出版の最終統合試験は、<code>./scripts/dev.sh recommended integration</code>で56
-tests / 839 assertions、終了コード0でした。
-WPCSを含む標準品質検査も、<code>./scripts/dev.sh recommended quality</code>で68
-tests / 96 assertions、終了コード0です。 <a
-href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">実行結果の記録</a>に、修正前の失敗と修正後の結果を残しています。</p>
+      <section id="recording" class="report-panel prose" aria-labelledby="tab-recording"><h2 id="recording-動作確認">動作確認</h2>
+<p>カートでの割引適用から購入確認、注文後の編集と設定変更の反映までを、2本の動画にまとめています。</p>
 <h3 id="recording-1-注文">1. 注文</h3>
 <p>商品の追加や購入数量の変更による</p>
 <ul>
 <li>割引の適用</li>
 <li>上位の割引ティア（上位のステップ式割引設定）への切り替わり</li>
+<li>購入確認画面への割引の反映</li>
 </ul>
 <p>これらの流れを確認します。動画は約38秒です。</p>
 <h4 id="recording-動画の流れ">動画の流れ</h4>
@@ -541,10 +541,16 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 <td data-label="動画内の操作">購入数量を増やす</td>
 <td data-label="説明">上位ティアの30,000円以上2,000円引きへ切り替わることを確認する。</td>
 </tr>
+<tr>
+<td data-label="No.">4</td>
+<td data-label="時間">0:28</td>
+<td data-label="動画内の操作">購入者側の「内容確認」画面を表示する</td>
+<td data-label="説明">ステップ割引2,000円が購入確認画面にも反映されていることを確認する。</td>
+</tr>
 </tbody>
 </table>
 <h4 id="recording-動画">動画</h4>
-<p><video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="注文時の割引適用とティア変更の操作動画" src="media/buy3.mp4">このブラウザーでは動画を再生できません。</video></p>
+<p><video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="カートの割引適用・ティア変更と購入確認画面の操作動画" src="media/buy3.mp4">このブラウザーでは動画を再生できません。</video></p>
 <h3 id="recording-2-注文後の編集">2. 注文後の編集</h3>
 <p>注文内容を変更する場合の店舗側の動作確認です。</p>
 <ul>
@@ -566,8 +572,8 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 <tr>
 <td data-label="No.">1</td>
 <td data-label="時間">0:05</td>
-<td data-label="動画内の操作">注文数量を減らす</td>
-<td data-label="説明">既存注文の商品数量を変更し、商品合計を下位ティアの金額に下げる。</td>
+<td data-label="動画内の操作">受注内容を確認し、注文数量を減らす</td>
+<td data-label="説明">管理者側の受注画面で、注文の商品・数量・割引額・合計金額を確認する。その後、商品数量を変更し、商品合計を下位ティアの金額に下げる。</td>
 </tr>
 <tr>
 <td data-label="No.">2</td>
@@ -597,7 +603,17 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 </table>
 <h4 id="recording-動画-1">動画</h4>
 <p><video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="注文後の数量変更とティア設定の保持を確認する操作動画" src="media/edit2.mp4">このブラウザーでは動画を再生できません。</video></p>
-<p>開発時の自動試験と確認結果は、プラグインのREADMEに掲載しています。</p>
+<h3 id="recording-補足自動試験の記録">補足：自動試験の記録</h3>
+<p>画面記録とは別に、購入確認画面と確定後の受注データは、開発時の実HTTP購入テストで照合しました。
+商品10,000円、割引500円、請求9,500円（内税863円）を確認画面で確認し、その画面から注文を確定して保存値が一致することを検証したものです。
+税込10%、送料・手数料・利用ポイントはすべて0の条件です。 <a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L24" target="_blank" rel="noopener noreferrer">購入確認画面の照合</a>と<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L505" target="_blank" rel="noopener noreferrer">同じ注文の保存値の照合</a>を参照できます。</p>
+<p>提出版の最終統合試験は、<code>./scripts/dev.sh recommended integration</code>で56
+tests / 839 assertions、終了コード0でした。
+WPCSを含む標準品質検査も、<code>./scripts/dev.sh recommended quality</code>で68
+tests / 96 assertions、終了コード0です。 <a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">実行結果の記録</a>と、プラグインのREADMEに詳細を掲載しています。</p>
 </section>
     </main>
   </div>
