@@ -11,6 +11,8 @@
 - `check.mjs`: 文書構造とタブ操作の依存追加なしの回帰チェック。
 - `public/ui-comparison.html`: 開発中のUI比較資料の最終版v6。CSS・JavaScript・比較画像8枚を埋め込んだ単一HTML。画像リンクも同じHTMLの別タブで原寸表示します。外部フォントは読み込まず、元のCSSにあるシステムフォントを使います。
 - `export-ui.py`: 元のVisDoc HTMLの絶対パスを引数に渡して、上記の単一HTMLを再生成するツール。通常のサイトビルドでは再生成しません。
+- `public/implementation-review/`: 実装・自己レビュー工程で作成された「実装・検証レポート」のHTMLと、参照されている検証ログ21件・画像1枚。本文内の画面3枚とスタイル・スクリプトは元HTMLへの埋め込みを保持しています。
+- `export-review.py`: `python3 docs/report/export-review.py`で、`docs/visdoc/briefing/0907_Welcart割引実装/`の元資料から上記を再生成します。本文は保持し、機能仕様・連携一覧・READMEへの相対リンク3件だけを提出版のGitHubリンクへ変換します。通常のサイトビルドでは再生成しません。
 - `wrangler.jsonc`: ブラッシュアップ後のCloudflare Static Assets配信用設定。
 
 ## ローカル確認

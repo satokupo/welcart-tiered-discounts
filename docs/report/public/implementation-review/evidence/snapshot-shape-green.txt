@@ -1,0 +1,8 @@
+Composer could not detect the root package (satokupo/welcart-tiered-discounts) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version
+PHPUnit 9.6.36 by Sebastian Bergmann and contributors.
+
+.....                                                               5 / 5 (100%)
+
+Time: 00:00.005, Memory: 56.50 MB
+
+OK (5 tests, 16 assertions)

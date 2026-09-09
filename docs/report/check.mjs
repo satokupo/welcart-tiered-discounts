@@ -31,8 +31,18 @@ for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
   } else if (/href="#/.test(tag)) {
     assert(!tag.includes('target="_blank"'), 'Internal navigation stays in the report');
   } else {
-    assert(tag.includes('href="ui-comparison.html"') && tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), 'UI document opens in a separate tab');
+    assert(/href="(?:ui-comparison.html|implementation-review\/index.html)"/.test(tag) && tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), 'Supporting documents open in separate tabs');
   }
+}
+
+assert(html.includes('href="implementation-review/index.html"'), 'Original implementation report is linked');
+const review = readFileSync(new URL('public/implementation-review/index.html', import.meta.url), 'utf8');
+assert(!/(?:href|src)="(?:\.\.\/|file:)|\/Users\/|\/Volumes\//.test(review), 'Archived report has no broken workspace references');
+assert.equal([...review.matchAll(/<img\b/g)].length, 3, 'Original screenshots are retained');
+const reviewAssets = new Set([...review.matchAll(/href="((?:evidence|images)\/[^"#]+)"/g)].map(match => match[1]));
+assert.equal(reviewAssets.size, 22, 'Original evidence and linked screenshot are retained');
+for (const path of reviewAssets) {
+  assert(readFileSync(new URL(`public/implementation-review/${path}`, import.meta.url)).length > 0);
 }
 
 const ui = readFileSync(new URL('public/ui-comparison.html', import.meta.url), 'utf8');
