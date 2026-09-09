@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Welcart自動段階割引プラグインの提出資料。プラグイン、設計メモ、AI活用レポート、動作確認の記録。">
+  <title>Welcart 自動段階割引 | 開発レポート</title>
+  <link rel="stylesheet" href="style.css?v=20260909-17">
+  <script src="app.js?v=20260909-7" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#report">本文へ移動</a>
+  <div class="page">
+    <header class="hero">
+      <div>
+        <h1 id="page-top" tabindex="-1"><a href="./" title="ホームへ戻る">Welcart 自動段階割引<br>開発レポート</a></h1>
+        <p>実装内容と、設計・検証・AI活用の記録。</p>
+      </div>
+      <img src="assets/tableware.png" alt="" width="480" height="360" fetchpriority="high">
+    </header>
+    <nav class="report-tabs" aria-label="報告内容">
+      <a id="tab-plugin" href="#plugin-main" data-tab="plugin"><span class="tab-number">01</span>プラグイン</a>
+      <a id="tab-design" href="#design" data-tab="design"><span class="tab-number">02</span>設計メモ</a>
+      <a id="tab-ai" href="#ai" data-tab="ai" aria-label="03 AI活用レポート"><span class="tab-number">03</span><span class="wide-label">AI活用レポート</span><span class="narrow-label">AI活用</span></a>
+      <a id="tab-recording" href="#recording" data-tab="recording"><span class="tab-number">04</span>動作確認</a>
+    </nav>
+    <main id="report" tabindex="-1">
+      <section id="plugin" class="report-panel" aria-labelledby="tab-plugin">
+        <section class="submission-overview prose" aria-labelledby="overview-プラグイン"><h2 id="overview-プラグイン">プラグイン</h2>
+<h3 id="overview-提出物について">提出物について</h3>
+<p>本課題では、<strong>割引額の計算を共通化し、Welcartの既存フックを通じてカート、購入確認、受注保存へ接続する</strong>方針で実装しました。
+Welcart本体とテーマは変更していません。
+登録販売価格と数量の商品小計を基準に、条件を満たす最も高いしきい値の1段を適用します。</p>
+<p>採用したフックと判断理由は<a
+href="#design">設計メモ</a>、3箇所の金額整合を確認した記録は<a
+href="#recording">動作確認</a>にまとめています。 <a
+href="#ai">AI活用レポート</a>では、人間が仕様を判断した場面と、AIの出力をテストで再現して修正した過程を説明しています。</p>
+<h3 id="overview-提出版と追加調整版">提出版と追加調整版</h3>
+<p>提出版をmainブランチに残し、翌日の追加検証と調整を含むdevブランチが少し先行する形で管理しています。</p>
+<ul>
+<li><strong>提出版（main）</strong>：想定作業時間を超えた段階で、実行中だったAIの一括処理の完了を待ち、最後に簡易的な全体レビューと必要な修正を行って作業を止めた版です。今回の主たる提出対象です。</li>
+<li><strong>翌日の追加調整版（dev）</strong>：mainをもとに、翌日改めて検証し、内部処理の2箇所をWelcartの既存機能を使う形に寄せた参考版です。</li>
+</ul>
+<p>調整したのは、税額計算をWelcartの既存関数へ委ねる部分と、受注画面の再計算ボタンを既存フィルタから接続する部分です。
+あわせて、前日に未確認だったWordPressの下限環境と最新環境で、購入から受注保存までの追加検証を行いました。</p>
+<p><strong>提供する機能と画面上の操作は、mainとdevで共通です。</strong>
+devは内部実装を調整したもので、利用者から見える動きは変えていません。
+2箇所の調整内容と採用理由は、<a
+href="#design">設計メモ</a>に記載しています。</p>
+<h3 id="overview-作業時間">作業時間</h3>
+<p>提出版は、以下の時間配分で作成しました。
+<strong>AIの処理待ちを含めて約8時間となり、想定の5〜7時間を超過しています。</strong>
+休憩、環境準備、提出資料の作成、翌日の追加作業は、この内訳には含めていません。</p>
+<table>
+<thead>
+<tr>
+<th>工程</th>
+<th>内容</th>
+<th>所要時間</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="工程">詳細計画まで</td>
+<td data-label="内容">要件整理、UIサンプル作成、設計・詳細計画、レビュー</td>
+<td data-label="所要時間">約5時間</td>
+</tr>
+<tr>
+<td data-label="工程">AIによる実装（一括実行）</td>
+<td data-label="内容">TDDによる実装・検証・自己チェック</td>
+<td data-label="所要時間">約2時間30分</td>
+</tr>
+<tr>
+<td data-label="工程">実装後の簡易全体レビュー</td>
+<td data-label="内容">別モデルによるレビュー、指摘の修正と回帰テスト</td>
+<td data-label="所要時間">約30分</td>
+</tr>
+</tbody>
+</table>
+<p>普段の個人開発では、AIの処理待ちに別タスクの計画や小規模な修正を進めています。
+また、実装に長時間かかる場合は、詳細計画を固めて業務終了時に実行し、翌日に結果を確認する進め方も取っています。
+今回はその待ち時間も含めて、約8時間として計上しました。</p>
+</section>
+        <nav class="version-tabs" aria-label="プラグインのバージョン">
+          <a id="tab-main" href="#plugin-main" data-version="main">提出版 <span>（main）</span></a>
+          <a id="tab-dev" href="#plugin-dev" data-version="dev">翌日の追加調整版 <span>（dev）</span></a>
+        </nav>
+        <section id="plugin-main" class="version-panel" aria-labelledby="tab-main">
+          <div class="version-intro"><p><strong>今回の提出対象となるプラグインです。</strong></p><p>翌日の追加調整版は、上の切り替えから確認できます。</p></div>
+          <div class="repository">
+            <div><strong>welcart-tiered-discounts <small>main</small></strong><p>提出版 · <a href="https://github.com/satokupo/welcart-tiered-discounts/tree/9056929086d8b9e9db7379e48bcd75fd4ea457f1" target="_blank" rel="noopener noreferrer">対象コミット 9056929 ↗</a></p></div>
+            <a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/tree/main" target="_blank" rel="noopener noreferrer">GitHub・READMEを開く <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>導入手順、動作確認、検証環境は、上のリンク先にあるREADMEをご覧ください。</p>
+        </section>
+        <section id="plugin-dev" class="version-panel" aria-labelledby="tab-dev">
+          <div class="version-intro"><p><strong>翌日に追加調整と検証を行った参考版です。</strong></p><p>既存フックの利用確認と、WordPressの下限環境（5.6.19）・最新環境（7.1）での追加検証を含みます。主たる提出対象はmainです。</p></div>
+          <div class="repository">
+            <div><strong>welcart-tiered-discounts <small>dev</small></strong><p>追加調整版 · <a href="https://github.com/satokupo/welcart-tiered-discounts/tree/334907ec022fd7f3babac1e450b43bb77dabbf1e" target="_blank" rel="noopener noreferrer">対象コミット 334907e ↗</a></p></div>
+            <a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/tree/dev" target="_blank" rel="noopener noreferrer">GitHub・READMEを開く <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>導入手順、動作確認、検証環境は、上のリンク先にあるREADMEをご覧ください。</p>
+        </section>
+      </section>
+      <section id="design" class="report-panel prose" aria-labelledby="tab-design"><h2 id="design-設計メモ">設計メモ</h2>
+<h3 id="design-開発中に作成した設計資料">開発中に作成した設計資料</h3>
+<p>開発中にAIと作成し、実装のもとにした設計資料は、次の2つのIssueの本文を参照してください。
+修正指示やレビューのログは、Issueのコメントに記載されています。
+要求を整理してから、その要求を実現するための詳細設計と実装計画へ進めました。</p>
+<div class="repository">
+<div><strong>要求定義に相当する作業フレーム</strong><p>私が「作業フレーム」と呼んでいる資料です。実現したいこと、対象範囲、制約、受入れ基準を整理し、要求定義に相当するものとして扱っています。</p></div>
+<a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/issues/3" target="_blank" rel="noopener noreferrer">Issue #3を開く <span aria-hidden="true">↗</span></a>
+</div>
+
+<div class="repository">
+<div><strong>詳細設計と実装計画</strong><p>作業フレームの要求をもとに、実際の環境や既存処理の制約を踏まえて、実装方針、作業手順、TDDと検証方法を具体化した資料です。</p></div>
+<a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/issues/4" target="_blank" rel="noopener noreferrer">Issue #4を開く <span aria-hidden="true">↗</span></a>
+</div>
+
+<div class="repository">
+<div><strong>UIのブレストに使った資料</strong><p>実際の管理設定・カート・購入確認・受注編集の画面と、画像生成で作ったUI案を比較した資料の最終版（v6）です。開発中の検討資料であり、適用後の画像は実装結果ではありません。</p></div>
+<a class="repo-button" href="ui-comparison.html" target="_blank" rel="noopener noreferrer">UI比較資料を開く <span aria-hidden="true">↗</span></a>
+</div>
+
+<div class="repository">
+<div><strong>AIによる実装・自己レビュー後の報告書</strong><p>約2時間30分の実装・検証工程の最後にAIが作成した「実装・検証レポート」です。実装範囲、設計判断、テスト結果、実際の画面、AIが見つけた問題と修正を収録しています。当時の資料のため、翌日の追加検証や修正は含みません。</p></div>
+<a class="repo-button" href="implementation-review/index.html" target="_blank" rel="noopener noreferrer">実装・検証レポートを開く <span aria-hidden="true">↗</span></a>
+</div>
+
+<hr />
+<h3
+id="design-開発後に整理した設計のまとめ">開発後に整理した設計のまとめ</h3>
+<p>以下は、開発を終えた後に、AIとのブレストで検討した内容と実装結果を通して整理したものです。
+採用したフックとその理由、見送った候補、翌日に見直した点をまとめています。</p>
+<h4 id="design-設計の要点">設計の要点</h4>
+<p><strong>割引額を計算する処理を共通化し、Welcartの計算・表示・保存の流れへ接続しました。</strong>
+Welcart本体・テーマのファイルは変更していません。</p>
+<p>設定保存にはWordPress Settings
+APIを使い、<code>manage_options</code>による権限確認、標準nonceの検証、入力値の検証・サニタイズを行います。不正入力では既存設定を保持します。</p>
+<p>受注編集では、購入時に有効だった全ティアを保存し、店舗側の管理者による受注編集時にも購入時点のレートで再計算可能にしています。再計算結果は保存時にもサーバーで照合し、金額と履歴の書込みに失敗した場合はDB更新を巻き戻します。</p>
+<h4
+id="design-使用したフックフィルタと選択理由">使用したフック・フィルタと選択理由</h4>
+<p>提出版mainの一覧です。Welcart側の連携とWordPress側の補助処理を分けて記載します。</p>
+<p><strong>Welcartのフックとフィルタ</strong></p>
+<table>
+<thead>
+<tr>
+<th>フック／フィルタ</th>
+<th>用途と選択理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_order_discount</code></td>
+<td data-label="用途と選択理由">Welcartが注文割引を確定する位置で、登録価格から計算した単一の割引と税率別内訳を反映する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_filter_cart_table_footer</code></td>
+<td data-label="用途と選択理由">カート表の末尾を拡張し、テンプレートを書き換えず割引行を表示する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_confirm_discount_label</code></td>
+<td data-label="用途と選択理由">購入確認と注文時の記録がある受注で、同じ割引名を表示する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_filter_confirm_inform</code></td>
+<td data-label="用途と選択理由">購入確認フォームへ、表示した内容に対応する確認用tokenを追加する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_purchase_check</code></td>
+<td data-label="用途と選択理由">注文登録前に最新の条件を再計算し、確認画面との差があれば再確認へ戻す</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_pre_reg_orderdata</code></td>
+<td data-label="用途と選択理由">新規注文の保存前にトランザクションを開始する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_action_reg_orderdata</code></td>
+<td data-label="用途と選択理由">Welcartの保存後に注文時の記録を作り、保存値を読み戻して確認する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_post_reg_orderdata</code></td>
+<td data-label="用途と選択理由">メール処理へ進む前に保存結果を再検証し、トランザクションを確定する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_filter_ordereditform_carttable</code></td>
+<td data-label="用途と選択理由">既存受注フォームへ、注文時の設定と履歴、再計算操作を追加する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_pre_update_orderdata</code></td>
+<td data-label="用途と選択理由">受注更新前に権限と確認内容を検証し、サーバーで計算した保存値を準備する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>usces_after_update_orderdata</code></td>
+<td data-label="用途と選択理由">受注更新後に金額と明細、税情報を照合し、履歴を保存して確定する</td>
+</tr>
+</tbody>
+</table>
+<p>登録箇所：<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/welcart.php#L13" target="_blank" rel="noopener noreferrer">購入側の登録</a>、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/orders.php#L12" target="_blank" rel="noopener noreferrer">受注側の登録</a>。</p>
+<p><strong>WordPress側の補助フック</strong></p>
+<table>
+<thead>
+<tr>
+<th>フック／フィルタ</th>
+<th>用途と選択理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="フック／フィルタ"><code>plugins_loaded</code></td>
+<td data-label="用途と選択理由">Welcartのロード後に連携を登録する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>admin_notices</code></td>
+<td data-label="用途と選択理由">Welcartがない場合に管理者へ依存関係を通知する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>admin_menu</code></td>
+<td data-label="用途と選択理由">WordPressの設定メニューへ画面を追加する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>admin_init</code></td>
+<td data-label="用途と選択理由">Settings
+APIへの登録と、受注画面が出力を始める前の保存要求検証に使う</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>admin_enqueue_scripts</code></td>
+<td data-label="用途と選択理由">設定画面に必要なJSだけを読み込む</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>the_post</code>、<code>template_redirect</code></td>
+<td data-label="用途と選択理由">再確認が必要な場合に動的に登録し、Welcartの確認画面への処理を再接続する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>wp_ajax_wtd_preview_order</code></td>
+<td data-label="用途と選択理由">権限とnonceを確認し、DBを変更しない専用の再計算結果を返す</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>wp_ajax_order_item_ajax</code></td>
+<td data-label="用途と選択理由">注文時の記録がある受注で、標準再計算による保存前のDB変更を防ぐ</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>wp_ajax_order_item2cart_ajax</code></td>
+<td data-label="用途と選択理由">商品追加を未保存のデータとして扱い、確定保存までDB書込みを保留する</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>query</code></td>
+<td data-label="用途と選択理由">注文書込み中のSQL失敗を検出するための補助監視</td>
+</tr>
+<tr>
+<td data-label="フック／フィルタ"><code>shutdown</code></td>
+<td data-label="用途と選択理由">処理が未完了で終了した場合に、未確定のDB更新と関連状態を復元する</td>
+</tr>
+</tbody>
+</table>
+<p>登録箇所：<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/welcart-tiered-discounts.php#L29" target="_blank" rel="noopener noreferrer">起動時</a>、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/settings.php#L418" target="_blank" rel="noopener noreferrer">設定画面</a>、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/orders.php#L12" target="_blank" rel="noopener noreferrer">受注処理</a>、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/welcart.php#L473" target="_blank" rel="noopener noreferrer">再確認</a>。</p>
+<p>プラグインから発火する既存アクションとして、<code>usces_admin_delete_orderrow</code>も使用します。
+削除処理でWelcartの拡張処理を通すための呼出しで、プラグインがcallbackを登録する項目とは区別しています。
+<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/plugin/includes/orders.php#L149" target="_blank" rel="noopener noreferrer">該当処理</a>を参照できます。</p>
+<h4
+id="design-課題条件の解釈と報告書作成時の追加確認">課題条件の解釈と、報告書作成時の追加確認</h4>
+<p>この提出資料を作成している段階で浮かんだ疑問があり、ここに専用セクションを追加します。</p>
+<p>実装時、私は「Welcartの既存フック／フィルタのみで実現すること」を、割引処理をWelcartへ組み込む際に、既存の拡張口を利用するという意味で理解していました。
+管理画面や設定保存にはWordPressの標準機能も併用できると考えており、WelcartとWordPressのフックをどちらか一方に限定する条件とは捉えていませんでした。</p>
+<p>この報告書を作成する段階で、この条件の文章である「Welcartの既存フック／フィルタのみで実現すること」を再確認した際、WordPress固有のフックの利用まで制限する意図があった可能性を考え、Codexに追加調査を依頼しました。
+Welcart
+2.12.1のソースを確認した結果、WordPress固有のフックを登録せずに、次の方法で設定画面と保存処理を実装する経路が見つかりました。</p>
+<table>
+<thead>
+<tr>
+<th>対象</th>
+<th>Welcartの既存フックを使う別案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="対象">設定画面</td>
+<td data-label="Welcartの既存フックを使う別案"><code>usces_action_admin_system_extentions</code>を使い、Welcartのシステム設定画面に割引設定フォームを追加する。WordPressの<code>admin_menu</code>で別の設定ページを作る必要はない</td>
+</tr>
+<tr>
+<td data-label="対象">設定保存</td>
+<td data-label="Welcartの既存フックを使う別案">同じ画面へフォームを通常送信し、同じWelcartフックの処理内で権限確認、nonce検証、入力検証、保存を行う。<code>admin_init</code>や独自AJAXアクションの登録を使わずに構成できる</td>
+</tr>
+</tbody>
+</table>
+<p>調査の根拠は、対象版の<a
+href="https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/classes/usceshop.class.php" target="_blank" rel="noopener noreferrer">管理画面の制御処理</a>と<a
+href="https://plugins.svn.wordpress.org/usc-e-shop/tags/2.12.1/includes/admin_system.php" target="_blank" rel="noopener noreferrer">設定画面の拡張口</a>です。
+割引計算から購入確認、受注保存への接続にも既存のWelcartフックがあるため、課題の必須機能はこの別案で構成できると判断しました。
+この場合も、nonce検証や設定保存にはWordPressの標準関数を利用します。
+確認したのはソース上の実装経路であり、別案への実装変更や実機試験は行っていません。</p>
+<p>もし出題意図が、WordPress固有のフックも使わずにWelcartの既存フックだけへ接続するという限定だったのであれば、私の事前確認が不足していました。
+実装時の解釈と、報告書作成時に確認した別案を区別して、ここに記録します。</p>
+<h4
+id="design-aiの自己レビューで検討した候補と比較">AIの自己レビューで検討した候補と比較</h4>
+<p>以下は、AIが技術的な採否を整理したものです。私が説明を受けて判断した経緯は、<a
+href="#ai">AI活用レポートの「AIの提案に対して人間が判断したこと」</a>に記載しています。</p>
+<table>
+<thead>
+<tr>
+<th>検討した方法</th>
+<th>採否と理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="検討した方法">表示金額だけを変更する</td>
+<td data-label="採否と理由">不採用。税・ポイント・受注データとの整合が取れない</td>
+</tr>
+<tr>
+<td data-label="検討した方法">割引を再計算のたびに加算する</td>
+<td data-label="採否と理由">不採用。再計算で割引が累積するため、今回の計算結果を反映する</td>
+</tr>
+<tr>
+<td data-label="検討した方法">標準AJAXをそのまま未保存プレビューに使う</td>
+<td data-label="採否と理由">不採用。税条件変更時のDB更新とJSON出力による処理終了が、保存前の確認用途に合わなかった</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="design-課題の必須要件を超えて含めた範囲と理由">課題の必須要件を超えて含めた範囲と理由</h4>
+<p>課題で求められていたのは、カート・購入確認・確定後の受注データで割引結果を整合させるところまででした。ただ、実際の店舗業務を想像すると、注文後に在庫状況などによって数量を変更することは十分にありそうだと考えました。そのため、既存の受注編集でも割引を適切に扱えるようにした方がよいと判断し、今回の作業に含めました。</p>
+<p>これに伴い、変更後の明細による再計算、購入時のティアの保存、保存前の計算結果の確認など、一連の関連処理も必要になりました。実際の業務を想定すれば、受注編集への対応は今も必要だったと考えています。ただし、変更履歴の保持まで含める必要があったかは、振り返ると見直す余地があったと考えています。</p>
+<p>割引方式は、固定額に加えて割合も選べるようにしました。課題では固定額だけで割引するよう指定されておらず、実際の運営では割合で割引したい店舗経営者もいるだろうと考えたためです。また、当時は固定額か割合かという計算方法の違いであれば、ロジックの変更も大きくないだろうと見込み、今回の実装に含めました。</p>
+<p>実務を想定して範囲を広げた結果、設計・実装・検証の対象も増え、全体では想定の5〜7時間を超えました。個々の対応には理由がありましたが、課題としてまず満たす範囲と、その後に対応する範囲を、時間の制約に合わせて切り分けきれなかった点は反省しています。</p>
+<h4
+id="design-作業フレーム内で案が出たが今回の提出物に含めなかった機能と理由">作業フレーム内で案が出たが、今回の提出物に含めなかった機能と理由</h4>
+<p>作業フレームを作る段階では、将来追加したい機能も整理しました。限られた時間でまず基本の段階式割引を完成させるため、次の機能はMVPから外し、追加候補として残しました。</p>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>将来実現したいこと</th>
+<th>MVPに含めなかった理由・今回の範囲</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="機能">日本語・英語への対応</td>
+<td data-label="将来実現したいこと">管理画面とプラグインが追加するフロント文言を、言語設定に応じて表示する</td>
+<td data-label="MVPに含めなかった理由・今回の範囲">基本機能の完成を優先し、翻訳文言の整備と各言語での表示確認は後続に回す</td>
+</tr>
+<tr>
+<td data-label="機能">商品カテゴリによる対象選択</td>
+<td data-label="将来実現したいこと">指定したカテゴリの商品だけでしきい値を判定し、その商品代金に割引を適用する</td>
+<td data-label="MVPに含めなかった理由・今回の範囲">MVPは全商品を対象とする。カテゴリの指定方法や複数カテゴリに属する商品の扱いなどは、着手時に決める</td>
+</tr>
+<tr>
+<td data-label="機能">ウィザード／オンボーディング</td>
+<td data-label="将来実現したいこと">導入時の設定を案内する</td>
+<td data-label="MVPに含めなかった理由・今回の範囲">MVPでは通常の設定画面を用意する範囲に絞る。案内する手順や画面構成は未決のため、後続で具体化する</td>
+</tr>
+<tr>
+<td data-label="機能">会員ランクによる振り分け</td>
+<td data-label="将来実現したいこと">会員ランクに応じて割引の対象を分ける</td>
+<td data-label="MVPに含めなかった理由・今回の範囲">対象・除外の指定やゲスト購入の扱いが未決のため、MVPに組み込まず候補として残す</td>
+</tr>
+<tr>
+<td data-label="機能">標準ポイント適用後の金額による判定</td>
+<td data-label="将来実現したいこと">ポイントで減額した後の金額を、しきい値判定と割引計算の基準にする</td>
+<td data-label="MVPに含めなかった理由・今回の範囲">MVPは減額前の商品小計を基準とする。将来変更できる構造を保ち、追加方式の実装は見送る</td>
+</tr>
+</tbody>
+</table>
+<p>検討内容と未決事項は、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/todo/POST_MVP.md" target="_blank" rel="noopener noreferrer">MVP後の追加機能の記録</a>にまとめています。</p>
+<h4
+id="design-翌日に追加検証して見直した設計dev">翌日に追加検証して見直した設計（dev）</h4>
+<p>WordPress
+7.1環境での確認がエラーで終わっていたことと、既存フックを適切に利用できているかの再チェックが抜けていたことから、翌日に追加検証を行いました。</p>
+<p>フックの利用を再点検すると、見直し候補が3つ見つかりました。
+専用のテスト環境を構築して、要件を保ったまま置き換えられるかを試し、2つは修正が必要と判断して変更しました。
+この2箇所がdev版の設計上の修正部分です。</p>
+<table>
+<thead>
+<tr>
+<th>見直した箇所</th>
+<th>main</th>
+<th>devでの判断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="見直した箇所">税額計算</td>
+<td data-label="main">独自計算とWelcartの丸め処理</td>
+<td data-label="devでの判断"><code>$usces-&gt;getTax()</code>と<code>usces_internal_tax()</code>へ委譲</td>
+</tr>
+<tr>
+<td data-label="見直した箇所">受注画面の再計算ボタン</td>
+<td data-label="main">JSでクリックを捕捉</td>
+<td data-label="devでの判断"><code>order_edit_form_recalculation</code>と<code>order_edit_form_recalculation_reduced</code>から専用プレビューへ接続</td>
+</tr>
+<tr>
+<td data-label="見直した箇所">受注全体の集計</td>
+<td data-label="main">注文時の条件と未保存明細から組み立て</td>
+<td data-label="devでの判断"><code>usces_order_recalculation</code>等への全面置換は見送り。未保存の追加明細と税率別割引を保つ補助処理が増えるため</td>
+</tr>
+</tbody>
+</table>
+<p>受注全体の集計は、未保存の追加明細などの扱いを保つため、現行の方法を維持しました。<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/334907ec022fd7f3babac1e450b43bb77dabbf1e/docs/SSoT/decisions/2026/09/2026-09-08_受注編集は税計算と再計算入口だけnativeへ委ねる.md" target="_blank" rel="noopener noreferrer">採否の詳細</a></p>
+<p>環境の追加検証では、WordPress
+7.1に加えて下限環境の5.6.19でも、前日に未確認だったHTTP購入やメール本文まで確認しました。<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/334907ec022fd7f3babac1e450b43bb77dabbf1e/docs/ENVIRONMENT_VERIFICATION.md#2026-09-08-dev版の未実施試験を補完" target="_blank" rel="noopener noreferrer">追加検証の記録</a></p>
+</section>
+      <section id="ai" class="report-panel prose" aria-labelledby="tab-ai"><h2 id="ai-ai活用レポート">AI活用レポート</h2>
+<h3
+id="ai-要求整理ui検討詳細計画約5時間">要求整理・UI検討・詳細計画（約5時間）</h3>
+<p>AIと人間の認識合わせをするパートです。ブレストを重ねるとだんだん情報が複雑になるので、大まかな枠組みを理解するのに適した<a
+href="https://github.com/anthropics/claude-plugins-community/tree/main/eli5" target="_blank" rel="noopener noreferrer">ELI5スキル</a>を併用しています。</p>
+<h4 id="ai-1-要求のブレストと作業フレーム">1.
+要求のブレストと作業フレーム</h4>
+<p>必須要件をベースに、ブラウザ版ChatGPT
+Proと、どのようなプラグインにするかを大まかにブレストします。これを「作業フレーム」（要求定義相当）としてIssueにまとめ、ローカルのCodexと認識を共有します。</p>
+<h4 id="ai-2-実画面をもとにしたui案の作成と調整">2.
+実画面をもとにしたUI案の作成と調整</h4>
+<p>ローカル環境は、事前にWelcartの推奨動作環境と最低動作環境をAIに確認させ、Docker
+Desktopを利用して構築しています。</p>
+<p>その環境内でCodexに作業フレームを提供し、関連するページを特定して、Welcart入りの初期状態のスクリーンショットを撮影します。その素材をもとに、フレームに書かれた機能を実装する場合のUIサンプルを画像生成スキルで視覚化し、比較資料を作成します。その資料をもとにブレストを行い、作業フレームをより明確にします。</p>
+<p>このとき、Welcartのデフォルト構造に想定外の点がいくつかあったため、フレームの修正が起きています。</p>
+<h4 id="ai-3-詳細計画の作成">3. 詳細計画の作成</h4>
+<p>確定した作業フレームをもとに、ローカルのCodexに詳細計画を作成させます。サンプルコードを書くのではなく、どの既存機能や部品を使い、どのような手順で機能を組み立てるかという、実装までの道順を具体化するものです。</p>
+<p>これは認知負荷が高いため、人間は詳細チェックを行っていません。作業フレームをアンカーとし、目的や制約を必要十分にカバーできているかを自己チェックさせる修正ループを回します。変更が必要と判断されるたびにバージョンを上げています。旧バージョンはすべて資料として残すため、後から確認できます。</p>
+<p>ローカル側で問題ないと判断したあとは、別のエージェントによるレビューと修正を続けます。今回はブラウザ版ChatGPT
+Proに外部レビューを依頼しています。</p>
+<p>今回はローカルの自己レビュー中に、必要以上に詳細化する方向へ挙動が傾いたため、通常よりもレビューに時間がかかったことが反省点の一つです。</p>
+<h3
+id="ai-aiによる実装の一括実行約2時間30分">AIによる実装の一括実行（約2時間30分）</h3>
+<p>詳細計画を記載したIssueをもとに、worktreeの中でCodexの<code>/goal</code>コマンドを使い、実装・検証から実装後の自己チェックと軽微な修正のループまでをまとめて依頼します。TDDで動作テストを先に構築し、エッジケースへの対応も想定した実装を進める方式です。ローカル環境での動作確認やコーディング規約の検査も、この工程に含まれています。</p>
+<p>Welcartの既存フックのチェックを計画書作成初期に行いましたが、実装中に改めて行うように明示的指示として含めるのが漏れてしまった点は反省点として認識しています。</p>
+<h3
+id="ai-実装後の簡易全体レビュー約30分">実装後の簡易全体レビュー（約30分）</h3>
+<p>実装後は、ブラウザ版ChatGPT
+Proに実装後のワークツリーリポジトリ・作業フレーム・作業計画を読ませ、簡易的な全体レビューを行いました。
+ここで見つかった割合設定の不具合は、当初は軽微と捉えていましたが、修正範囲が局所的でも割引額への影響は大きいものでした。
+CodexにTDDでの再現と修正を依頼し、リポジトリ全体の調査時間も合わせて約30分かけています。
+提出版のmainには、この修正までを含めています。</p>
+<hr />
+<h3
+id="ai-aiの誤りをどう発見し修正したか">AIの誤りをどう発見し、修正したか</h3>
+<p>実装が一度ですべてうまくいくとは考えていないため、まず実装を担当したAI自身にレビューと修正をさせています。実装時の文脈と「本来どうするべきだったか」という計画の意図を持ったまま見直せるので、計画に含まれていたのに実装されていない項目などを、この段階で拾う狙いです。</p>
+<p>ただし、同じAIだけでは、自分の実装を正しいと捉える確証バイアスのような偏りが残る可能性もあります。そのため、別のモデルによるレビューを重視しており、Codexで実装したものをClaudeやGrokにレビューさせる方法も使っています。</p>
+<p>今回は、ブラウザ版ChatGPT
+Proをレビュー役に選びました。私の利用経験では、複雑な前提を整理して推論する場面で、コーディングに特化したCodexよりも頼れると感じることがあります。また、Codexとは異なる実行環境やツール構成でレビューすることで、同じOpenAIのモデルでも実装時とは異なる視点を得られると期待したものです。</p>
+<h4
+id="ai-今回のレビューで見つかった問題と修正">今回のレビューで見つかった問題と修正</h4>
+<p>具体例は、初回や空の一覧から割合設定を保存するときに変換処理が重複し、0.5%が50%になるなどの不具合です。
+別チャットのレビューAIによる指摘を受け、私はTDDで局所修正する範囲を指定しました。
+Codexが実HTTPの保存テストで問題を再現したうえで、入力値を二重に変換しない処理へ修正しています。</p>
+<p>修正後は、商品小計10,000円に0.5%を設定すると割引50円、10%なら割引1,000円になることに加え、再表示と再保存でも値が変わらないことを確認しました。
+対象のHTTP保存テストは修正前に4件失敗し、修正後は5 tests / 85
+assertionsで成功しました。 その後、全体の回帰テストも成功しています。<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">修正記録</a></p>
+<h3
+id="ai-aiの提案に対して人間が判断したこと">AIの提案に対して人間が判断したこと</h3>
+<p>AIの説明や提案を受けて、私が変更や対象外の判断をした例です。
+当時の回答は、<a
+href="https://github.com/satokupo/welcart-tiered-discounts/issues/3#issuecomment-5565656949" target="_blank" rel="noopener noreferrer">Issue
+#3の追加回答の記録</a>に詳細がまとめられています。</p>
+<h4
+id="ai-受注編集時の割引を自動計算し購入時の条件を保つ">受注編集時の割引を自動計算し、購入時の条件を保つ</h4>
+<p>当初、受注編集時に店舗側の管理者が手動で割引額を調整する案を提案されました。しかし、商品や数量を変更するたびに管理者が割引額を計算する運用は使い勝手がよくないと考え、変更後の内容に応じて自動計算する仕組みを求めました。</p>
+<p>検討の中では、購入後に店舗のティア設定が変更されていた場合、どの条件で再計算するかという問題も挙がりました。そこで、購入時に有効だった全ティアを注文データに保存し、受注編集でも当時のしきい値と割引率・割引額で再計算するルールにしました。計算結果は管理者が確認して保存します。</p>
+<h4
+id="ai-welcartの価格の扱いを確認し登録価格をそのまま使う">Welcartの価格の扱いを確認し、登録価格をそのまま使う</h4>
+<p>未確定の仕様を詰める中で、税込価格から税抜価格を逆算するなど、複雑な計算ロジックが提案されました。この時点では私自身がWelcartの価格の扱いを十分に把握していなかったため、まず仕組みを調べて報告するよう依頼しました。</p>
+<p>その結果、商品に登録する価格は1つで、その金額を税込・税抜のどちらとして扱うかは店舗の設定で決まるとわかりました。そこで、税抜価格への換算を追加せず、もともと登録されている金額をそのまま割引の判定と計算に使う、シンプルな方針を指示しました。</p>
+<h4
+id="ai-他の割引との競合は対象外としポイント対応の拡張余地を残す">他の割引との競合は対象外とし、ポイント対応の拡張余地を残す</h4>
+<p>他の割引と競合した場合の扱いも論点になりました。ただし、組み合わせごとの条件まで考慮すると複雑になるため、競合の検出や制御はMVPに含めないことにしました。MVPでは、標準ポイントによる減額も含め、割引やポイントを適用する前の対象商品小計で判定と割引計算を行います。</p>
+<p>一方で、将来は標準ポイントで減額した後の金額を基準にできるよう、拡張性を持たせることを求めました。ポイント適用後の判定そのものは今回実装せず、後から基準額の作り方を変更できる処理構造にしています。</p>
+<h3
+id="ai-うまくいかなかったことと改善点">うまくいかなかったことと改善点</h3>
+<h4
+id="ai-実装中にも既存フックを確認する">実装中にも既存フックを確認する</h4>
+<p>AIへの基本指示には、既存フックを利用する方針と参照先を含め、計画書作成初期に確認していました。ただし、実装中にも既存フックを再確認するよう明記しておらず、利用できる既存処理の見落としが残り、翌日の見直しと修正につながりました。計画時の確認に加え、実装中にも利用候補と用途、実際の挙動を検証する工程を明示する必要があったと考えています。</p>
+<h4
+id="ai-試行して決める余地を計画に残す">試行して決める余地を計画に残す</h4>
+<p>詳細計画を作成する段階で、AIの判断が、厳密に進める方向へ想定以上に傾いていました。実際には小さく実装して挙動を確かめた方が早い部分まで事前に詳細を詰めようとしたことが、計画の修正を増やした原因の一つです。</p>
+<p>途中でこの状況に気づき、実装時に試行して決める余地を残すよう指示を加えましたが、もう少し早く気づければよかったと考えています。今回はv5まで改訂を重ねたものの、私の見立てでは、通常ならv3程度で収束させてもよい内容でした。</p>
+<p>この経験を踏まえ、守るべき要件と確認する結果は事前に決めつつ、実現方法のどこを試行に委ねてよいかも、最初にAIと共有するよう作業フローを修正しています。</p>
+<h4
+id="ai-購入者側の金額表示を分かりやすくする">購入者側の金額表示を分かりやすくする</h4>
+<p>購入者側の画面では、商品金額や割引額、最終的な支払額をより把握しやすくするなど、UXを高める余地がまだ十分にあると考えています。</p>
+<h4
+id="ai-保存処理と表示機能を分けて検討する">保存処理と表示機能を分けて検討する</h4>
+<p>購入時の割引条件を保持する保存処理は必要でした。一方、変更履歴の確認にはWelcart標準の操作ログを活用できるため、独自の履歴表示は省けたと考えています。</p>
+<h4
+id="ai-複数の変更が重なるエッジケースへの対応は見送った">複数の変更が重なるエッジケースへの対応は見送った</h4>
+<p>動作確認の動画を撮影しているときに、購入申請後に決済が完了していない状態で、受注内容の変更と店舗の税の方針変更が重なるエッジケースが発覚しました。
+設定した作業時間を超過していたため、追加の修正には進まず、今回は対応を見送りました。</p>
+<p>対応を再開する場合は、このケースをAIに伝え、これまでと同じ流れで再現テストから修正、回帰確認までをTDDで進める想定です。
+具体的な原因の切り分けと修正方法の検討はAIに委ねるため、現時点では確定していません。</p>
+<h4
+id="ai-実装検証レポートの分かりやすさを改善する">実装・検証レポートの分かりやすさを改善する</h4>
+<p>実装・検証レポートはビジュアルドキュメントとして作成していますが、人間が内容を把握しやすくする点では、まだ改善の余地があると認識しています。実務を進める中で、特に確認すべきポイントが明確になってくると考えているため、それに合わせて自動作成される報告書も改善していく予定です。</p>
+</section>
+      <section id="recording" class="report-panel prose" aria-labelledby="tab-recording"><h2 id="recording-動作確認">動作確認</h2>
+<h3 id="recording-動画について">動画について</h3>
+<p>カートでの割引適用から購入確認、注文後の編集と設定変更の反映までを、2本の動画にまとめています。</p>
+<h3 id="recording-1-注文">1. 注文</h3>
+<p>商品の追加や購入数量の変更による</p>
+<ul>
+<li>割引の適用</li>
+<li>上位の割引ティア（上位のステップ式割引設定）への切り替わり</li>
+<li>購入確認画面への割引の反映</li>
+</ul>
+<p>これらの流れを確認します。動画は約38秒です。</p>
+<h4 id="recording-動画の流れ">動画の流れ</h4>
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>時間</th>
+<th>動画内の操作</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="No.">1</td>
+<td data-label="時間">0:00</td>
+<td data-label="動画内の操作">割引適用前のカートを表示する</td>
+<td data-label="説明">商品合計が10,000円未満で、ステップ割引が適用されていない状態を確認する。</td>
+</tr>
+<tr>
+<td data-label="No.">2</td>
+<td data-label="時間">0:09</td>
+<td data-label="動画内の操作">商品を追加する</td>
+<td data-label="説明">商品を追加して、10,000円以上500円引きのステップ割引を適用する。</td>
+</tr>
+<tr>
+<td data-label="No.">3</td>
+<td data-label="時間">0:20</td>
+<td data-label="動画内の操作">購入数量を増やす</td>
+<td data-label="説明">上位ティアの30,000円以上2,000円引きへ切り替わることを確認する。</td>
+</tr>
+<tr>
+<td data-label="No.">4</td>
+<td data-label="時間">0:28</td>
+<td data-label="動画内の操作">購入者側の「内容確認」画面を表示する</td>
+<td data-label="説明">ステップ割引2,000円が購入確認画面にも反映されていることを確認する。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recording-動画">動画</h4>
+<p><video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="カートの割引適用・ティア変更と購入確認画面の操作動画" src="media/buy3.mp4">このブラウザーでは動画を再生できません。</video></p>
+<h3 id="recording-2-注文後の編集">2. 注文後の編集</h3>
+<p>注文内容を変更する場合の店舗側の動作確認です。</p>
+<ul>
+<li>注文数量の変更による再計算</li>
+<li>割引設定を変更したときの既存注文・新しい購入への反映</li>
+</ul>
+<p>これらを確認します。動画は約1分11秒です。</p>
+<h4 id="recording-動画の流れ-1">動画の流れ</h4>
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>時間</th>
+<th>動画内の操作</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="No.">1</td>
+<td data-label="時間">0:05</td>
+<td data-label="動画内の操作">受注内容を確認し、注文数量を減らす</td>
+<td data-label="説明">管理者側の受注画面で、注文の商品・数量・割引額・合計金額を確認する。その後、商品数量を変更し、商品合計を下位ティアの金額に下げる。</td>
+</tr>
+<tr>
+<td data-label="No.">2</td>
+<td data-label="時間">0:08</td>
+<td data-label="動画内の操作">ステップ割引を再計算する</td>
+<td data-label="説明">10,000円以上500円引きの下位ティアへ切り替わることを確認する。</td>
+</tr>
+<tr>
+<td data-label="No.">3</td>
+<td data-label="時間">0:30</td>
+<td data-label="動画内の操作">店舗のティア設定を変更する</td>
+<td data-label="説明">10,000円以上の割引額を、500円から100円へ変更する。</td>
+</tr>
+<tr>
+<td data-label="No.">4</td>
+<td data-label="時間">0:45</td>
+<td data-label="動画内の操作">既存注文の数量を減らして再計算する</td>
+<td data-label="説明">注文作成時のティア設定が使われるため、割引は500円のままで、100円には変わらないことを確認する。購入時のティア記録も表示されている。</td>
+</tr>
+<tr>
+<td data-label="No.">5</td>
+<td data-label="時間">1:04</td>
+<td data-label="動画内の操作">新しい購入のカートを表示する</td>
+<td data-label="説明">変更後の10,000円以上100円引きが適用されることを確認する。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="recording-動画-1">動画</h4>
+<p><video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="注文後の数量変更とティア設定の保持を確認する操作動画" src="media/edit2.mp4">このブラウザーでは動画を再生できません。</video></p>
+<h3 id="recording-補足自動試験の記録">補足：自動試験の記録</h3>
+<p>画面記録とは別に、購入確認画面と確定後の受注データは、開発時の実HTTP購入テストで照合しました。
+商品10,000円、割引500円、請求9,500円（内税863円）を確認画面で確認し、その画面から注文を確定して保存値が一致することを検証したものです。
+税込10%、送料・手数料・利用ポイントはすべて0の条件です。 <a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L24" target="_blank" rel="noopener noreferrer">購入確認画面の照合</a>と<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L505" target="_blank" rel="noopener noreferrer">同じ注文の保存値の照合</a>を参照できます。</p>
+<p>提出版の最終統合試験は、<code>./scripts/dev.sh recommended integration</code>で56
+tests / 839 assertions、終了コード0でした。
+WPCSを含む標準品質検査も、<code>./scripts/dev.sh recommended quality</code>で68
+tests / 96 assertions、終了コード0です。 <a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">実行結果の記録</a>と、プラグインのREADMEに詳細を掲載しています。</p>
+</section>
+    </main>
+  </div>
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="トップへ戻る" title="トップへ戻る" data-visible="false">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="m6 14 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</body>
+</html>

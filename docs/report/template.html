@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Welcart自動段階割引プラグインの提出資料。プラグイン、設計メモ、AI活用レポート、動作確認の記録。">
+  <title>Welcart 自動段階割引 | 開発レポート</title>
+  <link rel="stylesheet" href="style.css?v=20260909-17">
+  <script src="app.js?v=20260909-7" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#report">本文へ移動</a>
+  <div class="page">
+    <header class="hero">
+      <div>
+        <h1 id="page-top" tabindex="-1"><a href="./" title="ホームへ戻る">Welcart 自動段階割引<br>開発レポート</a></h1>
+        <p>実装内容と、設計・検証・AI活用の記録。</p>
+      </div>
+      <img src="assets/tableware.png" alt="" width="480" height="360" fetchpriority="high">
+    </header>
+    <nav class="report-tabs" aria-label="報告内容">
+      <a id="tab-plugin" href="#plugin-main" data-tab="plugin"><span class="tab-number">01</span>プラグイン</a>
+      <a id="tab-design" href="#design" data-tab="design"><span class="tab-number">02</span>設計メモ</a>
+      <a id="tab-ai" href="#ai" data-tab="ai" aria-label="03 AI活用レポート"><span class="tab-number">03</span><span class="wide-label">AI活用レポート</span><span class="narrow-label">AI活用</span></a>
+      <a id="tab-recording" href="#recording" data-tab="recording"><span class="tab-number">04</span>動作確認</a>
+    </nav>
+    <main id="report" tabindex="-1">
+      <section id="plugin" class="report-panel" aria-labelledby="tab-plugin">
+        <section class="submission-overview prose" aria-labelledby="overview-プラグイン">{{overview}}</section>
+        <nav class="version-tabs" aria-label="プラグインのバージョン">
+          <a id="tab-main" href="#plugin-main" data-version="main">提出版 <span>（main）</span></a>
+          <a id="tab-dev" href="#plugin-dev" data-version="dev">翌日の追加調整版 <span>（dev）</span></a>
+        </nav>
+        <section id="plugin-main" class="version-panel" aria-labelledby="tab-main">
+          <div class="version-intro"><p><strong>今回の提出対象となるプラグインです。</strong></p><p>翌日の追加調整版は、上の切り替えから確認できます。</p></div>
+          <div class="repository">
+            <div><strong>welcart-tiered-discounts <small>main</small></strong><p>提出版 · <a href="https://github.com/satokupo/welcart-tiered-discounts/tree/9056929086d8b9e9db7379e48bcd75fd4ea457f1" target="_blank" rel="noopener noreferrer">対象コミット 9056929 ↗</a></p></div>
+            <a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/tree/main" target="_blank" rel="noopener noreferrer">GitHub・READMEを開く <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>導入手順、動作確認、検証環境は、上のリンク先にあるREADMEをご覧ください。</p>
+        </section>
+        <section id="plugin-dev" class="version-panel" aria-labelledby="tab-dev">
+          <div class="version-intro"><p><strong>翌日に追加調整と検証を行った参考版です。</strong></p><p>既存フックの利用確認と、WordPressの下限環境（5.6.19）・最新環境（7.1）での追加検証を含みます。主たる提出対象はmainです。</p></div>
+          <div class="repository">
+            <div><strong>welcart-tiered-discounts <small>dev</small></strong><p>追加調整版 · <a href="https://github.com/satokupo/welcart-tiered-discounts/tree/334907ec022fd7f3babac1e450b43bb77dabbf1e" target="_blank" rel="noopener noreferrer">対象コミット 334907e ↗</a></p></div>
+            <a class="repo-button" href="https://github.com/satokupo/welcart-tiered-discounts/tree/dev" target="_blank" rel="noopener noreferrer">GitHub・READMEを開く <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>導入手順、動作確認、検証環境は、上のリンク先にあるREADMEをご覧ください。</p>
+        </section>
+      </section>
+      <section id="design" class="report-panel prose" aria-labelledby="tab-design">{{design}}</section>
+      <section id="ai" class="report-panel prose" aria-labelledby="tab-ai">{{ai}}</section>
+      <section id="recording" class="report-panel prose" aria-labelledby="tab-recording">{{recording}}</section>
+    </main>
+  </div>
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="トップへ戻る" title="トップへ戻る" data-visible="false">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="m6 14 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</body>
+</html>
