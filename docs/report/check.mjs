@@ -21,6 +21,7 @@ assert(!/<a\b[^>]*\bdownload\b/.test(html), 'Standalone video download links are
 assert(html.includes('data-label="所要時間"'), 'Mobile time table retains column labels');
 assert(!ids.some(id => id.startsWith('main-') || id.startsWith('dev-')), 'README is read on GitHub');
 assert(ids.includes('overview-提出物について'));
+assert(html.includes('<h1 id="page-top" tabindex="-1"><a href="./"'), 'Report title links to home');
 for (const number of [3, 4]) {
   assert(html.includes(`href="https://github.com/satokupo/welcart-tiered-discounts/issues/${number}" target="_blank" rel="noopener noreferrer"`), 'Design sources open in a separate tab');
 }
@@ -31,6 +32,8 @@ for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
   } else if (/href="#/.test(tag)) {
     assert(!tag.includes('target="_blank"'), 'Internal navigation stays in the report');
     assert(ids.includes(tag.match(/href="#([^"]+)"/)[1]), 'Internal navigation must target an existing section');
+  } else if (/href="\.\/"/.test(tag)) {
+    assert(!tag.includes('target="_blank"'), 'Home link stays in the report tab');
   } else {
     assert(/href="(?:ui-comparison.html|implementation-review\/index.html)"/.test(tag) && tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), 'Supporting documents open in separate tabs');
   }

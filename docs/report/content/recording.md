@@ -1,22 +1,6 @@
-# 動作確認の記録
+# 動作確認
 
-カートでの割引適用と注文後の編集を2本の動画にまとめています。
-購入確認画面と確定後の受注データの金額は、開発時の実HTTP購入テストでも照合しました。
-
-## 必須要件の3箇所で確認したこと
-
-| 確認箇所 | 確認した金額と動作 | 確認記録 |
-| --- | --- | --- |
-| カート画面 | 10,000円以上で500円引き、30,000円以上で2,000円引きに切り替わる | 下の「1. 注文」の動画 |
-| 購入確認画面 | 商品10,000円、割引500円、請求9,500円（内税863円） | [確認画面のHTTPテスト](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L24) |
-| 確定後の受注データ | その確認画面から注文を確定し、商品10,000円、割引500円、請求9,500円の保存値と注文時の記録が一致する | [同じ注文の保存値の照合](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L505) |
-
-購入確認と受注保存の数値は、税込10%、送料、手数料、利用ポイントがすべて0の条件で確認した例です。
-カート動画では複数の商品と数量を使って、しきい値をまたぐと割引が切り替わる様子を確認できます。
-
-上記のHTTPテストを含む提出版の最終統合試験は、`./scripts/dev.sh recommended integration`で56 tests / 839 assertions、終了コード0でした。
-WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68 tests / 96 assertions、終了コード0です。
-[実行結果の記録](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20)に、修正前の失敗と修正後の結果を残しています。
+カートでの割引適用から購入確認、注文後の編集と設定変更の反映までを、2本の動画にまとめています。
 
 ## 1. 注文
 
@@ -24,6 +8,7 @@ WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68
 
 - 割引の適用
 - 上位の割引ティア（上位のステップ式割引設定）への切り替わり
+- 購入確認画面への割引の反映
 
 これらの流れを確認します。動画は約38秒です。
 
@@ -34,10 +19,11 @@ WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68
 | 1 | 0:00 | 割引適用前のカートを表示する | 商品合計が10,000円未満で、ステップ割引が適用されていない状態を確認する。 |
 | 2 | 0:09 | 商品を追加する | 商品を追加して、10,000円以上500円引きのステップ割引を適用する。 |
 | 3 | 0:20 | 購入数量を増やす | 上位ティアの30,000円以上2,000円引きへ切り替わることを確認する。 |
+| 4 | 0:28 | 購入者側の「内容確認」画面を表示する | ステップ割引2,000円が購入確認画面にも反映されていることを確認する。 |
 
 ### 動画
 
-<video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="注文時の割引適用とティア変更の操作動画" src="media/buy3.mp4">このブラウザーでは動画を再生できません。</video>
+<video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="カートの割引適用・ティア変更と購入確認画面の操作動画" src="media/buy3.mp4">このブラウザーでは動画を再生できません。</video>
 
 ## 2. 注文後の編集
 
@@ -52,7 +38,7 @@ WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68
 
 | No. | 時間 | 動画内の操作 | 説明 |
 | --- | --- | --- | --- |
-| 1 | 0:05 | 注文数量を減らす | 既存注文の商品数量を変更し、商品合計を下位ティアの金額に下げる。 |
+| 1 | 0:05 | 受注内容を確認し、注文数量を減らす | 管理者側の受注画面で、注文の商品・数量・割引額・合計金額を確認する。その後、商品数量を変更し、商品合計を下位ティアの金額に下げる。 |
 | 2 | 0:08 | ステップ割引を再計算する | 10,000円以上500円引きの下位ティアへ切り替わることを確認する。 |
 | 3 | 0:30 | 店舗のティア設定を変更する | 10,000円以上の割引額を、500円から100円へ変更する。 |
 | 4 | 0:45 | 既存注文の数量を減らして再計算する | 注文作成時のティア設定が使われるため、割引は500円のままで、100円には変わらないことを確認する。購入時のティア記録も表示されている。 |
@@ -62,4 +48,13 @@ WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68
 
 <video class="operation-video" controls preload="metadata" playsinline controlslist="nodownload" aria-label="注文後の数量変更とティア設定の保持を確認する操作動画" src="media/edit2.mp4">このブラウザーでは動画を再生できません。</video>
 
-開発時の自動試験と確認結果は、プラグインのREADMEに掲載しています。
+## 補足：自動試験の記録
+
+画面記録とは別に、購入確認画面と確定後の受注データは、開発時の実HTTP購入テストで照合しました。
+商品10,000円、割引500円、請求9,500円（内税863円）を確認画面で確認し、その画面から注文を確定して保存値が一致することを検証したものです。
+税込10%、送料・手数料・利用ポイントはすべて0の条件です。
+[購入確認画面の照合](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L24)と[同じ注文の保存値の照合](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/tests/CheckoutHttpTest.php#L505)を参照できます。
+
+提出版の最終統合試験は、`./scripts/dev.sh recommended integration`で56 tests / 839 assertions、終了コード0でした。
+WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68 tests / 96 assertions、終了コード0です。
+[実行結果の記録](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20)と、プラグインのREADMEに詳細を掲載しています。

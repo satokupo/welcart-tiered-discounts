@@ -10,6 +10,7 @@ a:focus-visible,main:focus-visible{outline:3px solid #3478c5;outline-offset:5px}
 .skip-link:focus{transform:none}
 .hero{display:flex;align-items:center;justify-content:space-between;gap:40px;min-height:245px;margin-bottom:22px}
 h1{font-size:clamp(1.8rem,3.4vw,2.75rem);line-height:1.48;letter-spacing:.025em;margin:0 0 18px;font-weight:700}
+h1 a{text-decoration:none}
 .hero p{margin:0;font-size:1rem}
 .hero img{width:32%;height:auto;object-fit:contain;max-height:240px}
 .report-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line);gap:0;margin-bottom:32px}
@@ -37,9 +38,10 @@ h1{font-size:clamp(1.8rem,3.4vw,2.75rem);line-height:1.48;letter-spacing:.025em;
 .submission-overview{margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--line)}
 .submission-overview td:last-child{white-space:nowrap}
 .document-label{font-size:.85rem;letter-spacing:.08em;color:var(--muted);margin:0 0 4px!important}
-.prose h2{font-size:1.65rem;line-height:1.5;margin:0 0 24px;letter-spacing:.01em}
-.prose h3{font-size:1.5rem;margin:40px 0 20px;line-height:1.6;border-left:4px solid var(--ink);padding-left:.7em}
-.prose h4{font-size:1.12rem;margin:32px 0 12px;line-height:1.6}
+.prose h2{color:#c94332;font-size:1.85rem;line-height:1.5;margin:0 0 24px;letter-spacing:.01em}
+.prose h3{color:#783faa;font-size:1.5rem;margin:64px 0 20px;line-height:1.6;border-left:4px solid currentColor;padding-left:.7em}
+.prose h4{position:relative;color:#176343;font-size:1.12rem;margin:56px 0 12px;line-height:1.6}
+.prose h4:before{content:"";position:absolute;left:-.65em;top:.69em;width:.22em;height:.22em;border-radius:50%;background:currentColor}
 .prose>:is(h2,h3,.document-label){margin-inline:calc(-1 * var(--reading-inset))}
 .prose>h4{margin-inline:calc(-1 * var(--reading-inset));margin-left:calc(1em - var(--reading-inset))}
 .prose>.document-label{margin-inline:calc(-1 * var(--reading-inset))!important}
@@ -69,7 +71,7 @@ h1{font-size:clamp(1.8rem,3.4vw,2.75rem);line-height:1.48;letter-spacing:.025em;
  .report-tabs{margin-bottom:24px}.report-tabs a{flex-direction:column;gap:4px;min-height:76px;font-size:.875rem;padding:10px 4px}.report-tabs a+a:before{height:36px;top:20px}.tab-number{font-size:1.15rem}.wide-label{display:none}.narrow-label{display:inline}
  .repository{align-items:flex-start;flex-direction:column;gap:14px;padding:18px}.repository strong{font-size:1rem}.repo-button{align-self:flex-start}
  .version-tabs a{font-size:.875rem;padding:10px}.version-intro p{font-size:.95rem}
- .prose h2{font-size:1.4rem}.prose h3{font-size:1.3rem}.prose pre{padding:16px}
+ .prose h2{font-size:1.6rem}.prose h3{font-size:1.3rem}.prose pre{padding:16px}
  .prose{--reading-inset:12px}
  .prose table,.prose tbody,.prose tr,.prose td{display:block}
  .prose table{font-size:.925rem}.prose colgroup{display:none}
