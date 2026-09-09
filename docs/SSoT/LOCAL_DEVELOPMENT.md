@@ -277,6 +277,14 @@ WordPress の debug log、PHP error log、container log はローカルで読め
 
 試験終了後は通常の `./scripts/dev.sh recommended up wordpress quality` で試験 override を外し、`WTD_TEST_MODE` と試験 MU mount が無いことを inspect で確認する。ボリュームは保持する。テスト・MU fixture・Docker 設定をプラグイン配布物に含めない。
 
+### 受注編集のJavaScript確認
+
+Node.jsで、受注再計算の連打・古い応答の破棄・入力変更後の保存保護を確認する。追加依存は不要で、PHPの `quality` とは別に実行する。
+
+```sh
+node tests/OrderRecalculationScriptTest.js
+```
+
 ## 検証記録
 
 21項目の受入記録は [環境の実測記録](../ENVIRONMENT_VERIFICATION.md) を使います。各項目に次を実測して記入してください。
