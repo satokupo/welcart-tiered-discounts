@@ -34,7 +34,20 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory docs/report/public
 - READMEはサイトに転載せず、各ブランチのGitHubへ案内します。
 - 実操作動画2本を掲載しています。注文は`public/media/buy3.mp4`（約38秒）、注文後の編集は`public/media/edit2.mp4`（約1分11秒）。ユーザーが撮影・編集したMP4を再圧縮せずに収録し、各動画の前に操作と確認ポイントを掲載しています。
 - GitHubへの提出先アクセスは別途確保します。サイトの公開だけでは非公開リポジトリの閲覧権限は付与されません。
-- まずローカルでブラッシュアップし、Cloudflareへの公開はその後に行います。
+- Cloudflare Workers Static Assetsで公開します。配信対象は`public/`で、`.assetsignore`により未使用の動画を除外します。
+
+## 公開手順と巡回制御
+
+リポジトリrootで次を実行します。Cloudflareへログイン済みのWranglerを使用します。
+
+```sh
+python3 docs/report/build.py
+node docs/report/check.mjs
+wrangler deploy --config docs/report/wrangler.jsonc --dry-run
+wrangler deploy --config docs/report/wrangler.jsonc
+```
+
+全配信ファイルに`X-Robots-Tag: noindex, nofollow, nosnippet, noimageindex`を付けます。Googlebotとbingbotはこの指示を読み取れるよう巡回を許可し、その他のクローラーには`robots.txt`で全パスの巡回拒否を指定します。これらの指示に従わないボットやエージェントのアクセスを防ぐ認証機能ではありません。Basic認証は設けず、バージョン別プレビューURLは無効にします。
 
 ## 挿絵
 

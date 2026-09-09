@@ -44,3 +44,6 @@ docs/visdoc/items/
 
 # ローカルOSのメタデータ
 .DS_Store
+
+# Cloudflare のローカル生成物
+/.wrangler/
