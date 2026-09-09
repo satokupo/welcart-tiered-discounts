@@ -31,10 +31,7 @@ for name in ("overview", "design", "ai", "recording"):
          "--to=html5", f"--id-prefix={name}-", "--shift-heading-level-by=1"],
         check=True, capture_output=True, text=True,
     ).stdout
-<<<<<<< HEAD
     rendered = re.sub(r'href="#' + name + r'-(plugin-main|plugin-dev|design|ai|recording)"', r'href="#\1"', rendered)
-=======
->>>>>>> codex/submission-report
     rendered = re.sub(r"<table\b[^>]*>.*?</table>", label_table, rendered, flags=re.S)
     template = template.replace("{{" + name + "}}", rendered)
 assert "{{" not in template, "Unresolved content slot"

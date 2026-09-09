@@ -45,13 +45,9 @@ docs/visdoc/items/
 # ローカルOSのメタデータ
 .DS_Store
 
-<<<<<<< HEAD
 # 提出レポートで配信する動画2本はGit管理する
 !docs/report/public/media/buy3.mp4
 !docs/report/public/media/edit2.mp4
 
 # Wranglerのローカルキャッシュ
-=======
-# Cloudflare のローカル生成物
->>>>>>> codex/submission-report
 /.wrangler/

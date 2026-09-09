@@ -56,7 +56,6 @@ for (const tabs of [reportTabs, versionTabs]) {
 window.addEventListener('hashchange', showReport);
 window.addEventListener('popstate', showReport);
 showReport();
-<<<<<<< HEAD
 
 const backToTop = document.getElementById('back-to-top');
 const updateBackToTop = () => { backToTop.dataset.visible = String(window.scrollY >= 300); };
@@ -75,5 +74,3 @@ for (const video of document.querySelectorAll('.operation-video')) {
   for (const event of ['play', 'pause', 'ended', 'emptied']) video.addEventListener(event, updateVideoCursor);
   updateVideoCursor();
 }
-=======
->>>>>>> codex/submission-report

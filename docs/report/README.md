@@ -33,11 +33,7 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory docs/report/public
 - dev: `334907ec022fd7f3babac1e450b43bb77dabbf1e`
 - READMEはサイトに転載せず、各ブランチのGitHubへ案内します。
 - 実操作動画2本を掲載しています。注文は`public/media/buy3.mp4`（約38秒）、注文後の編集は`public/media/edit2.mp4`（約1分11秒）。ユーザーが撮影・編集したMP4を再圧縮せずに収録し、各動画の前に操作と確認ポイントを掲載しています。
-<<<<<<< HEAD
 - GitHubリポジトリは公開済みです。README、コード、Issueはログインせずに閲覧できます。
-=======
-- GitHubへの提出先アクセスは別途確保します。サイトの公開だけでは非公開リポジトリの閲覧権限は付与されません。
->>>>>>> codex/submission-report
 - Cloudflare Workers Static Assetsで公開します。配信対象は`public/`で、`.assetsignore`により未使用の動画を除外します。
 
 ## 公開手順と巡回制御

@@ -1,6 +1,5 @@
 # 動作確認の記録
 
-<<<<<<< HEAD
 カートでの割引適用と注文後の編集を2本の動画にまとめています。
 購入確認画面と確定後の受注データの金額は、開発時の実HTTP購入テストでも照合しました。
 
@@ -18,9 +17,6 @@
 上記のHTTPテストを含む提出版の最終統合試験は、`./scripts/dev.sh recommended integration`で56 tests / 839 assertions、終了コード0でした。
 WPCSを含む標準品質検査も、`./scripts/dev.sh recommended quality`で68 tests / 96 assertions、終了コード0です。
 [実行結果の記録](https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20)に、修正前の失敗と修正後の結果を残しています。
-=======
-注文時と注文後の編集の2本に分け、動画で行っている操作と確認ポイントを掲載しています。
->>>>>>> codex/submission-report
 
 ## 1. 注文
 
