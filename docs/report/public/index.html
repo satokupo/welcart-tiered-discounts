@@ -5,15 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Welcart自動段階割引プラグインの提出資料。プラグイン、設計メモ、AI活用レポート、動作確認の記録。">
   <title>Welcart 自動段階割引 | 開発レポート</title>
+<<<<<<< HEAD
   <link rel="stylesheet" href="style.css?v=20260909-7">
   <script src="app.js?v=20260909-7" defer></script>
+=======
+  <link rel="stylesheet" href="style.css?v=20260909-2">
+  <script src="app.js" defer></script>
+>>>>>>> codex/submission-report
 </head>
 <body>
   <a class="skip-link" href="#report">本文へ移動</a>
   <div class="page">
     <header class="hero">
       <div>
+<<<<<<< HEAD
         <h1 id="page-top" tabindex="-1">Welcart 自動段階割引<br>開発レポート</h1>
+=======
+        <h1>Welcart 自動段階割引<br>開発レポート</h1>
+>>>>>>> codex/submission-report
         <p>実装内容と、設計・検証・AI活用の記録。</p>
       </div>
       <img src="assets/tableware.png" alt="" width="480" height="360" fetchpriority="high">
@@ -27,6 +36,7 @@
     <main id="report" tabindex="-1">
       <section id="plugin" class="report-panel" aria-labelledby="tab-plugin">
         <section class="submission-overview prose" aria-labelledby="overview-提出物について"><h2 id="overview-提出物について">提出物について</h2>
+<<<<<<< HEAD
 <p>本課題では、<strong>割引額の計算を共通化し、Welcartの既存フックを通じてカート、購入確認、受注保存へ接続する</strong>方針で実装しました。
 Welcart本体とテーマは変更していません。
 登録販売価格と数量の商品小計を基準に、条件を満たす最も高いしきい値の1段を適用します。</p>
@@ -47,6 +57,13 @@ devは内部実装を調整したもので、利用者から見える動きは�
 2箇所の調整内容と採用理由は、<a
 href="#design">設計メモ</a>に記載しています。</p>
 <h3 id="overview-作業時間">作業時間</h3>
+=======
+<p>プラグインは、次の2つのバージョンを用意しています。</p>
+<ul>
+<li><strong>提出版（main）</strong>：想定作業時間を区切りとして、その時点で実行中だったAIの一括処理が終わるまで待ち、簡易的なレビューとそれに必要な修正を行って終了した版です。</li>
+<li><strong>翌日の追加調整版（dev）</strong>：提出版で検証が不足していた箇所について追加検証を行い、調整を加えた版です。</li>
+</ul>
+>>>>>>> codex/submission-report
 <p>提出版は、以下の時間配分で作成しました。
 <strong>AIの処理待ちを含めて約8時間となり、想定の5〜7時間を超過しています。</strong>
 休憩、環境準備、提出資料の作成、翌日の追加作業は、この内訳には含めていません。</p>
@@ -266,7 +283,11 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 <h4
 id="design-aiの自己レビューで検討した候補と比較">AIの自己レビューで検討した候補と比較</h4>
 <p>以下は、AIが技術的な採否を整理したものです。私が説明を受けて判断した経緯は、<a
+<<<<<<< HEAD
 href="#ai">AI活用レポートの「AIの提案に対して人間が判断したこと」</a>に記載しています。</p>
+=======
+href="#design-ai">AI活用レポートの「AIの提案に対して人間が判断したこと」</a>に記載しています。</p>
+>>>>>>> codex/submission-report
 <table>
 <thead>
 <tr>
@@ -403,10 +424,14 @@ id="ai-aiによる実装の一括実行約2時間30分">AIによる実装の一�
 <h3
 id="ai-実装後の簡易全体レビュー約30分">実装後の簡易全体レビュー（約30分）</h3>
 <p>実装後は、ブラウザ版ChatGPT
+<<<<<<< HEAD
 Proに実装後のワークツリーリポジトリ・作業フレーム・作業計画を読ませ、簡易的な全体レビューを行いました。
 ここで見つかった割合設定の不具合は、当初は軽微と捉えていましたが、修正範囲が局所的でも割引額への影響は大きいものでした。
 CodexにTDDでの再現と修正を依頼し、リポジトリ全体の調査時間も合わせて約30分かけています。
 提出版のmainには、この修正までを含めています。</p>
+=======
+Proに実装後のワークツリーリポジトリ・作業フレーム・作業計画を読ませ、簡易的な全体レビューを行いました。ここで指摘された問題は軽微と捉えていたものの、Codexでの修正にもTDDを使ったため、リポジトリ全体の調査時間も合わせるとこの工程にかかった時間は約30分です。提出版のmainには、この修正までを含めています。</p>
+>>>>>>> codex/submission-report
 <hr />
 <h3
 id="ai-aiの誤りをどう発見し修正したか">AIの誤りをどう発見し、修正したか</h3>
@@ -416,6 +441,7 @@ id="ai-aiの誤りをどう発見し修正したか">AIの誤りをどう発見�
 Proをレビュー役に選びました。私の利用経験では、複雑な前提を整理して推論する場面で、コーディングに特化したCodexよりも頼れると感じることがあります。また、Codexとは異なる実行環境やツール構成でレビューすることで、同じOpenAIのモデルでも実装時とは異なる視点を得られると期待したものです。</p>
 <h4
 id="ai-今回のレビューで見つかった問題と修正">今回のレビューで見つかった問題と修正</h4>
+<<<<<<< HEAD
 <p>具体例は、初回や空の一覧から割合設定を保存するときに変換処理が重複し、0.5%が50%になるなどの不具合です。
 別チャットのレビューAIによる指摘を受け、私はTDDで局所修正する範囲を指定しました。
 Codexが実HTTPの保存テストで問題を再現したうえで、入力値を二重に変換しない処理へ修正しています。</p>
@@ -423,6 +449,10 @@ Codexが実HTTPの保存テストで問題を再現したうえで、入力値�
 対象のHTTP保存テストは修正前に4件失敗し、修正後は5 tests / 85
 assertionsで成功しました。 その後、全体の回帰テストも成功しています。<a
 href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">修正記録</a></p>
+=======
+<p>具体例は、割合設定の保存時に変換処理が重複し、0.5%が50%になるなどの不具合です。別チャットのレビューAIによる指摘を受け、私はTDDで局所修正する範囲を指定しました。Codexが実HTTPの保存テストで問題を再現したうえで、入力値を二重に変換しない処理へ修正し、回帰テストの成功を確認する流れで対応しています。<a
+href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L14" target="_blank" rel="noopener noreferrer">修正記録</a></p>
+>>>>>>> codex/submission-report
 <h3
 id="ai-aiの提案に対して人間が判断したこと">AIの提案に対して人間が判断したこと</h3>
 <p>AIの説明や提案を受けて、私が変更や対象外の判断をした例です。
@@ -459,15 +489,20 @@ id="ai-保存処理と表示機能を分けて検討する">保存処理と表�
 <p>購入時の割引条件を保持する保存処理は必要でした。一方、変更履歴の確認にはWelcart標準の操作ログを活用できるため、独自の履歴表示は省けたと考えています。</p>
 <h4
 id="ai-複数の変更が重なるエッジケースへの対応は見送った">複数の変更が重なるエッジケースへの対応は見送った</h4>
+<<<<<<< HEAD
 <p>動作確認の動画を撮影しているときに、購入申請後に決済が完了していない状態で、受注内容の変更と店舗の税の方針変更が重なるエッジケースが発覚しました。
 設定した作業時間を超過していたため、追加の修正には進まず、今回は対応を見送りました。</p>
 <p>対応を再開する場合は、このケースをAIに伝え、これまでと同じ流れで再現テストから修正、回帰確認までをTDDで進める想定です。
 具体的な原因の切り分けと修正方法の検討はAIに委ねるため、現時点では確定していません。</p>
+=======
+<p>撮影準備中に、購入申請後に決済が完了していない状態で、受注内容の変更と店舗の税の方針変更が重なるエッジケースへの対応が必要だと認識しました。ただし、設定した作業時間を超過していたため、今回は対応を見送りました。</p>
+>>>>>>> codex/submission-report
 <h4
 id="ai-実装検証レポートの分かりやすさを改善する">実装・検証レポートの分かりやすさを改善する</h4>
 <p>実装・検証レポートはビジュアルドキュメントとして作成していますが、人間が内容を把握しやすくする点では、まだ改善の余地があると認識しています。実務を進める中で、特に確認すべきポイントが明確になってくると考えているため、それに合わせて自動作成される報告書も改善していく予定です。</p>
 </section>
       <section id="recording" class="report-panel prose" aria-labelledby="tab-recording"><h2 id="recording-動作確認の記録">動作確認の記録</h2>
+<<<<<<< HEAD
 <p>カートでの割引適用と注文後の編集を2本の動画にまとめています。
 購入確認画面と確定後の受注データの金額は、開発時の実HTTP購入テストでも照合しました。</p>
 <h3
@@ -505,6 +540,9 @@ tests / 839 assertions、終了コード0でした。
 WPCSを含む標準品質検査も、<code>./scripts/dev.sh recommended quality</code>で68
 tests / 96 assertions、終了コード0です。 <a
 href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9db7379e48bcd75fd4ea457f1/docs/work/log/2026/09.md#L20" target="_blank" rel="noopener noreferrer">実行結果の記録</a>に、修正前の失敗と修正後の結果を残しています。</p>
+=======
+<p>注文時と注文後の編集の2本に分け、動画で行っている操作と確認ポイントを掲載しています。</p>
+>>>>>>> codex/submission-report
 <h3 id="recording-1-注文">1. 注文</h3>
 <p>商品の追加や購入数量の変更による</p>
 <ul>
@@ -601,8 +639,11 @@ href="https://github.com/satokupo/welcart-tiered-discounts/blob/9056929086d8b9e9
 </section>
     </main>
   </div>
+<<<<<<< HEAD
   <button id="back-to-top" class="back-to-top" type="button" aria-label="トップへ戻る" title="トップへ戻る" data-visible="false">
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="m6 14 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
+=======
+>>>>>>> codex/submission-report
 </body>
 </html>

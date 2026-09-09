@@ -30,7 +30,10 @@ for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
     assert(tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), 'Every external link opens safely in a separate tab');
   } else if (/href="#/.test(tag)) {
     assert(!tag.includes('target="_blank"'), 'Internal navigation stays in the report');
+<<<<<<< HEAD
     assert(ids.includes(tag.match(/href="#([^"]+)"/)[1]), 'Internal navigation must target an existing section');
+=======
+>>>>>>> codex/submission-report
   } else {
     assert(/href="(?:ui-comparison.html|implementation-review\/index.html)"/.test(tag) && tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), 'Supporting documents open in separate tabs');
   }
@@ -96,6 +99,7 @@ const versions = ['main', 'dev'].map(name => {
 });
 const location = { hash: '' };
 const listeners = {};
+<<<<<<< HEAD
 const videos = [0, 1].map(() => ({
   paused: true, ended: false, dataset: {}, events: {},
   addEventListener(name, listener) { this.events[name] = listener; },
@@ -111,11 +115,20 @@ const window = {
 runInNewContext(readFileSync(new URL('public/app.js', import.meta.url), 'utf8'), {
   document: {
     querySelectorAll: selector => ({ '[data-tab]': reports, '[data-version]': versions, '.operation-video': videos })[selector],
+=======
+runInNewContext(readFileSync(new URL('public/app.js', import.meta.url), 'utf8'), {
+  document: {
+    querySelectorAll: selector => selector === '[data-tab]' ? reports : versions,
+>>>>>>> codex/submission-report
     getElementById: id => elements.get(id),
   },
   location,
   history: { pushState: (_state, _title, hash) => { location.hash = hash; } },
+<<<<<<< HEAD
   window,
+=======
+  window: { addEventListener: (name, listener) => { listeners[name] = listener; } },
+>>>>>>> codex/submission-report
 });
 const visible = () => ['plugin-main', 'plugin-dev', 'design', 'ai', 'recording']
   .filter(id => !elements.get(id).hidden && (!id.startsWith('plugin-') || !elements.get('plugin').hidden));
@@ -142,6 +155,7 @@ listeners.hashchange();
 assert.deepEqual(visible(), ['plugin-main']);
 versions[1].events.keydown({ key: ' ', preventDefault() {} });
 assert.deepEqual(visible(), ['plugin-dev']);
+<<<<<<< HEAD
 const backToTop = elements.get('back-to-top');
 assert.equal(backToTop.dataset.visible, 'false', 'Back-to-top is hidden at the top');
 window.scrollY = 600;
@@ -173,3 +187,6 @@ for (const video of videos) {
   assert.equal(video.dataset.playing, 'false');
 }
 console.log('PASS: document structure, branch links, mobile labels, tab/version switching, keyboard, history, back-to-top, video cursors');
+=======
+console.log('PASS: document structure, branch links, mobile labels, tab/version switching, keyboard, history');
+>>>>>>> codex/submission-report
